@@ -1,9 +1,9 @@
-package com.example.projekt1;
+package com.example.projekt1.Models;
 
 import lombok.Data;
 
 @Data
 public class Attachment {
-    private int id, id_post;
+    private int id_post;
     private String filename;
 }
