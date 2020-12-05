@@ -2,15 +2,30 @@ package com.example.projekt1.Managers;
 
 import com.example.projekt1.Interfaces.AttachmentInterface;
 import com.example.projekt1.Models.Attachment;
+import com.example.projekt1.Models.Post;
+import com.opencsv.bean.CsvToBean;
+import com.opencsv.bean.CsvToBeanBuilder;
 import org.springframework.stereotype.Service;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class AttachmentManager implements AttachmentInterface {
 
-    private static final List<Attachment> attachments = new ArrayList<>();
+    private static List<Attachment> attachments;
+
+    public AttachmentManager() throws FileNotFoundException {
+        Reader reader = new BufferedReader(new FileReader("src/main/java/com/example/projekt1/csv/Attachments.csv"));
+        CsvToBean<Attachment> csvReader = new CsvToBeanBuilder(reader)
+                .withType(Attachment.class).withSeparator(',').withIgnoreQuotations(false)
+                .withIgnoreLeadingWhiteSpace(true).build();
+        attachments = csvReader.parse();
+    }
 
     @Override
     public void addAttachment(Attachment attachment){

@@ -2,15 +2,30 @@ package com.example.projekt1.Managers;
 
 import com.example.projekt1.Interfaces.AuthorIterface;
 import com.example.projekt1.Models.Author;
+import com.example.projekt1.Models.Post;
+import com.opencsv.bean.CsvToBean;
+import com.opencsv.bean.CsvToBeanBuilder;
 import org.springframework.stereotype.Service;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class AuthorManager implements AuthorIterface {
 
-    private static final List<Author> authors = new ArrayList<>();
+    private static List<Author> authors;
+
+    public AuthorManager() throws FileNotFoundException {
+        Reader reader = new BufferedReader(new FileReader("src/main/java/com/example/projekt1/csv/Authors.csv"));
+        CsvToBean<Author> csvReader = new CsvToBeanBuilder(reader)
+                .withType(Author.class).withSeparator(',').withIgnoreQuotations(false)
+                .withIgnoreLeadingWhiteSpace(true).build();
+        authors = csvReader.parse();
+    }
 
     @Override
     public void addAuthor(Author author){

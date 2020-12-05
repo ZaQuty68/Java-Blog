@@ -2,15 +2,30 @@ package com.example.projekt1.Managers;
 
 import com.example.projekt1.Interfaces.CommentInterface;
 import com.example.projekt1.Models.Comment;
+import com.example.projekt1.Models.Post;
+import com.opencsv.bean.CsvToBean;
+import com.opencsv.bean.CsvToBeanBuilder;
 import org.springframework.stereotype.Service;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class CommentManager implements CommentInterface {
 
-    private static final List<Comment> comments = new ArrayList<>();
+    private static List<Comment> comments;
+
+    public CommentManager() throws FileNotFoundException {
+        Reader reader = new BufferedReader(new FileReader("src/main/java/com/example/projekt1/csv/Comments2.csv"));
+        CsvToBean<Comment> csvReader = new CsvToBeanBuilder(reader)
+                .withType(Comment.class).withSeparator(',').withIgnoreQuotations(false)
+                .withIgnoreLeadingWhiteSpace(true).build();
+        comments = csvReader.parse();
+    }
 
     @Override
     public void addComment(Comment comment){
