@@ -7,7 +7,6 @@ import com.opencsv.bean.CsvToBeanBuilder;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -16,11 +15,9 @@ public class PostManager implements PostInterface {
     private static List<Post> posts;
 
     public PostManager() throws FileNotFoundException {
-        ClassLoader classLoader = getClass().getClassLoader();
-        File file = new File(classLoader.getResource("csv/Posts.csv").getFile());
-        Reader reader = new BufferedReader(new FileReader(file));
+        Reader reader = new BufferedReader(new FileReader("src/main/java/com/example/projekt1/csv/Posts.csv"));
         CsvToBean<Post> csvReader = new CsvToBeanBuilder(reader)
-                .withType(Post.class).withSeparator(',').withIgnoreQuotations(true)
+                .withType(Post.class).withSeparator(',').withIgnoreQuotations(false)
                 .withIgnoreLeadingWhiteSpace(true).build();
         posts = csvReader.parse();
     }
