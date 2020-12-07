@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Adding new post</title>
+</head>
+<body>
+    <h1>Adding new post</h1>
+    <form method="POST" th:action="@{/addPost}" th:object="${post}">
+        <h1>Creating new post</h1>
+        <div th:if="${#fields.hasErrors()}">
+            <span class="ValidationError">
+                Please correct following errors:
+            </span>
+        </div>
+        <label for="id">Authors:</label>
+        <select th:value="${id}" name="id" id="id" multiple="multiple">
+            <option th:each="author: ${authors}" th:value="${author.id}" th:text="${author.username}">Username</option>
+        </select>
+        <br/>
+
+        <label for="post_content">Post content:</label>
+        <input type="text" th:field="*{post_content}"/>
+
+        <span class="validationError"
+              th:if="${#fields.hasErrors('post_content')}"
+              th:errors="*{post_content}">Post content Error
+        </span>
+        <br/>
+
+        <label for="tags">Tags:</label>
+        <input type="text" th:field="*{tags}"/>
+
+        <span class="validationError"
+              th:if="${#fields.hasErrors('tags')}"
+              th:errors="*{tags}">Tags Error
+        </span>
+        <br/>
+        <input type="submit" value="Submit"/>
+    </form>
+</body>
+</html>

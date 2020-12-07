@@ -1,14 +1,23 @@
 package com.example.projekt1.Controllers;
 
 import com.example.projekt1.Managers.*;
+import com.example.projekt1.Models.Post;
+import com.example.projekt1.Models.Posts_Authors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.Errors;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+
+import javax.validation.Valid;
 
 
 @Controller
 public class BlogController {
+    private int pid=150;
 
     @Autowired
     AttachmentManager atm;
@@ -30,5 +39,36 @@ public class BlogController {
         model.addAttribute("comments", cm.getAllComments());
         model.addAttribute("attachments", atm.getAllAttachments());
         return "homePage";
+    }
+
+    @GetMapping("/addPost")
+    public String addPost(Model model){
+        model.addAttribute("post", new Post());
+        model.addAttribute("authors", aum.getAllAuthors());
+        return "addPost";
+    }
+    @PostMapping("/addPost")
+    public String processAddingPost(@Valid Post post, Errors errors, int[] id, Model model){
+        if(errors.hasErrors()){
+            model.addAttribute("authors", aum.getAllAuthors());
+            return "addPost";
+        }
+        pid++;
+        post.setId(pid);
+        pm.addPost(post);
+        if(id.length != 0){
+            for(int i: id){
+                Posts_Authors par = new Posts_Authors();
+                par.setId_author(i);
+                par.setId_post(pid);
+                pam.addP_A(par);
+            }
+        }
+        return "redirect:/";
+    }
+    @DeleteMapping("/deletePost/{id}")
+    public String deletePost(@PathVariable int id){
+        pm.deletePost(id);
+        return "redirect:/";
     }
 }
