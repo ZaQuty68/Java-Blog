@@ -36,6 +36,21 @@ public class CommentManager implements CommentInterface {
     public List<Comment> getAllComments(){ return comments; }
 
     @Override
+    public void deleteCommentsByPostId(int id){
+        List<Comment> commentsToDelete = null;
+        for(Comment comment: comments){
+            if(comment.getId_post() == id){
+                commentsToDelete.add(comment);
+            }
+        }
+        if(!commentsToDelete.isEmpty()){
+            for(Comment comment: commentsToDelete){
+                comments.remove(comment);
+            }
+        }
+    }
+
+    @Override
     public Comment getCommentById(int id){
         Comment commentToReturn = null;
         for (Comment comment: comments){
@@ -63,6 +78,27 @@ public class CommentManager implements CommentInterface {
     public boolean checkComment(int id){
         for(Comment comment: comments){
             if(comment.getId() == id){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public List<Comment> getCommentsByPostId(int id){
+        List<Comment> commentsToReturn = new ArrayList<>();
+        for(Comment comment: comments){
+            if(comment.getId_post() == id){
+                commentsToReturn.add(comment);
+            }
+        }
+        return commentsToReturn;
+    }
+
+    @Override
+    public boolean checkCommentsByPostId(int id){
+        for(Comment comment: comments){
+            if(comment.getId_post() == id){
                 return true;
             }
         }

@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
 @Constraint(validatedBy = TagsValidator.class)
 public @interface Tags {
 
-    String message() default "There is up to 4 tags allowed";
+    String message() default "There is from 1 to 4 tags allowed";
 
     Class<?>[] groups() default {};
 

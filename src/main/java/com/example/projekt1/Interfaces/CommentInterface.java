@@ -10,9 +10,15 @@ public interface CommentInterface {
 
     List<Comment> getAllComments();
 
+    void deleteCommentsByPostId(int id);
+
     Comment getCommentById(int id);
 
     void deleteComment(int id);
 
     boolean checkComment(int id);
+
+    List<Comment> getCommentsByPostId(int id);
+
+    boolean checkCommentsByPostId(int id);
 }

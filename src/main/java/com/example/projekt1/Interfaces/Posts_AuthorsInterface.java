@@ -10,6 +10,8 @@ public interface Posts_AuthorsInterface {
 
     List<Posts_Authors> getAllPostsAuthors();
 
+    void deleteByPostId(int id);
+
     List<Posts_Authors> getByPostId(int id);
 
     List<Posts_Authors> getByAuthorId(int id);

@@ -6,11 +6,13 @@
 </head>
 <body>
     <h1>Welcome to my blog!</h1>
-    <p>Here are all the posts:</p>
+    <a th:href="@{/addPost}">Add new post</a>
+    <h2>Here are all the posts:</h2>
     <div th:each="post : ${posts}">
+        <a th:href="@{/deletePostConfirm/{id}(id=${post.id})}" id="deletePost">Delete this post</a>
+        <a th:href="@{/editPost/{id}(id=${post.id})}">Edit this post</a>
         <p>Authors: <span th:each="par : ${pa}" th:if="${par.id_post == post.id}"><span th:each="author : ${authors}" th:text="${par.id_author == author.id ? author.username : ''} + ${' '}"/></span></p>
         <p th:text = "${post.post_content}"/>
-        <a th:href="@{/deletePostConfirm/{id}(id=${post.id})}" id="deletePost">Delete this post</a>
         <p th:text="${'Tags: '} + ${post.tags}"/>
         <p>Comments:</p>
         <p th:each="comment :${comments}" th:text="${post.id == comment.id_post ? comment.comment_content : ''}"/>

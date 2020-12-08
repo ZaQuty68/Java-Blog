@@ -36,6 +36,21 @@ public class Posts_AuthorsManager implements Posts_AuthorsInterface {
     public  List<Posts_Authors> getAllPostsAuthors(){ return pa; }
 
     @Override
+    public void deleteByPostId(int id){
+        List<Posts_Authors> parsToDelete = new ArrayList<>();
+        for(Posts_Authors par: pa){
+            if(par.getId_post() == id){
+                parsToDelete.add(par);
+            }
+        }
+        if(!parsToDelete.isEmpty()){
+            for(Posts_Authors par: parsToDelete){
+                pa.remove(par);
+            }
+        }
+    }
+
+    @Override
     public List<Posts_Authors> getByPostId(int id){
         List<Posts_Authors> parsToReturn = new ArrayList<>();
         for(Posts_Authors par: pa){

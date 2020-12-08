@@ -3,6 +3,7 @@ package com.example.projekt1.Managers;
 import com.example.projekt1.Interfaces.AuthorIterface;
 import com.example.projekt1.Models.Author;
 import com.example.projekt1.Models.Post;
+import com.example.projekt1.Models.Posts_Authors;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
 import org.springframework.stereotype.Service;
@@ -67,5 +68,18 @@ public class AuthorManager implements AuthorIterface {
             }
         }
         return false;
+    }
+
+    @Override
+    public List<Author> getAuthorsByPostId(List<Posts_Authors> pa){
+        List<Author> authorsToReturn = null;
+        for(Posts_Authors par: pa){
+            for(Author author: authors){
+                if(author.getId() == par.getId_author()){
+                    authorsToReturn.add(author);
+                }
+            }
+        }
+        return authorsToReturn;
     }
 }

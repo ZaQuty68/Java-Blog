@@ -10,6 +10,7 @@ import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 
 @Controller
@@ -34,7 +35,6 @@ public class BlogController {
         model.addAttribute("pa", pam.getAllPostsAuthors());
         model.addAttribute("authors", aum.getAllAuthors());
         model.addAttribute("comments", cm.getAllComments());
-        model.addAttribute("attachments", atm.getAllAttachments());
         return "homePage";
     }
 
@@ -69,12 +69,41 @@ public class BlogController {
         model.addAttribute("pa", pam.getAllPostsAuthors());
         model.addAttribute("authors", aum.getAllAuthors());
         model.addAttribute("comments", cm.getAllComments());
-        model.addAttribute("attachments", atm.getAllAttachments());
         return "deletePostConfirm";
     }
     @RequestMapping(value = "/deletePost/{id}", method = RequestMethod.GET)
     public String deletePost(@PathVariable int id){
         pm.deletePost(id);
+        pam.deleteByPostId(id);
+        cm.deleteCommentsByPostId(id);
+        return "redirect:/";
+    }
+    @GetMapping("/editPost/{id}")
+    public String editPost(Model model, @PathVariable int id){
+        model.addAttribute("post", pm.getPostById(id));
+        model.addAttribute("pa", pam.getAllPostsAuthors());
+        model.addAttribute("authors", aum.getAllAuthors());
+        model.addAttribute("comments", cm.getAllComments());
+        return "editPost";
+    }
+    @PostMapping("/editPost/{id}")
+    public String processEditPost(@Valid Post post, Errors errors, int[] idA, Model model, @PathVariable int id){
+        if(errors.hasErrors()){
+            model.addAttribute("authors", aum.getAllAuthors());
+            return "editPost";
+        }
+        Post postToEdit = pm.getPostById(id);
+        postToEdit.setPost_content(post.getPost_content());
+        postToEdit.setTags(post.getTags());
+        pam.deleteByPostId(id);
+        if(idA.length != 0){
+            for(int i: idA){
+                Posts_Authors par = new Posts_Authors();
+                par.setId_author(i);
+                par.setId_post(id);
+                pam.addP_A(par);
+            }
+        }
         return "redirect:/";
     }
 }
