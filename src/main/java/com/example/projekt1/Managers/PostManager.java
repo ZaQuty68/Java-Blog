@@ -53,4 +53,14 @@ public class PostManager implements PostInterface {
             posts.remove(postToRemove);
         }
     }
+
+    @Override
+    public boolean checkPost(int id){
+        for (Post post: posts){
+            if (post.getId() == id){
+                return true;
+            }
+        }
+        return false;
+    }
 }

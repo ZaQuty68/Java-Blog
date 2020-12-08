@@ -60,4 +60,14 @@ public class AttachmentManager implements AttachmentInterface {
             }
         }
     }
+
+    @Override
+    public boolean checkAttachment(int id){
+        for(Attachment attachment: attachments){
+            if(attachment.getId_post() == id){
+                return true;
+            }
+        }
+        return false;
+    }
 }

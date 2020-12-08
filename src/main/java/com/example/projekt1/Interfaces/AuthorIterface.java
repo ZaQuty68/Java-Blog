@@ -13,4 +13,6 @@ public interface AuthorIterface {
     Author getAuthorById(int id);
 
     void deleteAuthor(int id);
+
+    boolean checkAuthor(int id);
 }

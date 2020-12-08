@@ -58,4 +58,14 @@ public class AuthorManager implements AuthorIterface {
             authors.remove(authorToRemove);
         }
     }
+
+    @Override
+    public boolean checkAuthor(int id){
+        for(Author author: authors){
+            if(author.getId() == id){
+                return true;
+            }
+        }
+        return false;
+    }
 }

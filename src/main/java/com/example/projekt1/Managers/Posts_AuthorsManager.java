@@ -34,4 +34,46 @@ public class Posts_AuthorsManager implements Posts_AuthorsInterface {
 
     @Override
     public  List<Posts_Authors> getAllPostsAuthors(){ return pa; }
+
+    @Override
+    public List<Posts_Authors> getByPostId(int id){
+        List<Posts_Authors> parsToReturn = new ArrayList<>();
+        for(Posts_Authors par: pa){
+            if(par.getId_post() == id){
+                parsToReturn.add(par);
+            }
+        }
+        return parsToReturn;
+    }
+
+    @Override
+    public List<Posts_Authors> getByAuthorId(int id){
+        List<Posts_Authors> parsToReturn = new ArrayList<>();
+        for(Posts_Authors par: pa){
+            if(par.getId_author() == id){
+                parsToReturn.add(par);
+            }
+        }
+        return parsToReturn;
+    }
+
+    @Override
+    public boolean checkForAuthor(int id){
+        for(Posts_Authors par: pa){
+            if(par.getId_author() == id){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean checkForPost(int id){
+        for(Posts_Authors par: pa){
+            if(par.getId_post() == id){
+                return true;
+            }
+        }
+        return false;
+    }
 }

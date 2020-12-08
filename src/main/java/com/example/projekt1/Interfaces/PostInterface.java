@@ -13,4 +13,6 @@ public interface PostInterface {
     Post getPostById(int id);
 
     void deletePost(int id);
+
+    boolean checkPost(int id);
 }

@@ -58,4 +58,14 @@ public class CommentManager implements CommentInterface {
             comments.remove(commentToRemove);
         }
     }
+
+    @Override
+    public boolean checkComment(int id){
+        for(Comment comment: comments){
+            if(comment.getId() == id){
+                return true;
+            }
+        }
+        return false;
+    }
 }

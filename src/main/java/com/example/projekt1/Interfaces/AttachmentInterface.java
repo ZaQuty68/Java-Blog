@@ -13,4 +13,6 @@ public interface AttachmentInterface {
     List<Attachment> getAttachmentsById(int id);
 
     void deleteAttachments(int id);
+
+    boolean checkAttachment(int id);
 }

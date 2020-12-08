@@ -13,4 +13,6 @@ public interface CommentInterface {
     Comment getCommentById(int id);
 
     void deleteComment(int id);
+
+    boolean checkComment(int id);
 }
