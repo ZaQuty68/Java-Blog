@@ -7,10 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
@@ -66,7 +63,16 @@ public class BlogController {
         }
         return "redirect:/";
     }
-    @DeleteMapping("/deletePost/{id}")
+    @GetMapping("/deletePostConfirm/{id}")
+    public String deletePostConfirm(Model model, @PathVariable int id){
+        model.addAttribute("post", pm.getPostById(id));
+        model.addAttribute("pa", pam.getAllPostsAuthors());
+        model.addAttribute("authors", aum.getAllAuthors());
+        model.addAttribute("comments", cm.getAllComments());
+        model.addAttribute("attachments", atm.getAllAttachments());
+        return "deletePostConfirm";
+    }
+    @RequestMapping(value = "/deletePost/{id}", method = RequestMethod.GET)
     public String deletePost(@PathVariable int id){
         pm.deletePost(id);
         return "redirect:/";
