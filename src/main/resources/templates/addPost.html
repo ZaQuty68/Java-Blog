@@ -14,7 +14,7 @@
             </span>
         </div>
         <label for="id">Authors:</label>
-        <select th:value="${id}" name="id" id="id" multiple="multiple">
+        <select th:value="${id}" name="id" id="id" multiple="multiple" required="required">
             <option th:each="author: ${authors}" th:value="${author.id}" th:text="${author.username}">Username</option>
         </select>
         <br/>
