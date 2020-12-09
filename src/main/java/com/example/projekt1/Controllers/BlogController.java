@@ -65,6 +65,9 @@ public class BlogController {
     }
     @GetMapping("/deletePostConfirm/{id}")
     public String deletePostConfirm(Model model, @PathVariable int id){
+        if(!pm.checkPost(id)){
+            return "redirect:/error/This post does not exist!";
+        }
         model.addAttribute("post", pm.getPostById(id));
         model.addAttribute("pa", pam.getAllPostsAuthors());
         model.addAttribute("authors", aum.getAllAuthors());
@@ -73,6 +76,9 @@ public class BlogController {
     }
     @RequestMapping(value = "/deletePost/{id}", method = RequestMethod.GET)
     public String deletePost(@PathVariable int id){
+        if(!pm.checkPost(id)){
+            return "redirect:/error/This post does not exist!";
+        }
         pm.deletePost(id);
         pam.deleteByPostId(id);
         cm.deleteCommentsByPostId(id);
@@ -80,6 +86,9 @@ public class BlogController {
     }
     @GetMapping("/editPost/{id}")
     public String editPost(Model model, @PathVariable int id){
+        if(!pm.checkPost(id)){
+            return "redirect:/error/This post does not exist!";
+        }
         model.addAttribute("post", pm.getPostById(id));
         model.addAttribute("pa", pam.getAllPostsAuthors());
         model.addAttribute("authors", aum.getAllAuthors());
@@ -88,6 +97,9 @@ public class BlogController {
     }
     @PostMapping("/editPost/{id}")
     public String processEditPost(@Valid Post post, Errors errors, int[] idA, Model model, @PathVariable int id){
+        if(!pm.checkPost(id)){
+            return "redirect:/error/This post does not exist!";
+        }
         if(errors.hasErrors()){
             model.addAttribute("authors", aum.getAllAuthors());
             return "editPost";
@@ -105,5 +117,38 @@ public class BlogController {
             }
         }
         return "redirect:/";
+    }
+    @GetMapping("/error/{message}")
+    public String errorMessage(Model model, @PathVariable String message){
+        model.addAttribute("message", message);
+        return "errorMessage";
+    }
+    @PostMapping("/searchPost")
+    public String searchPost(Model model, String type, String pattern){
+        if(pattern.length() == 0){
+            return "redirect:/";
+        }
+        if(type.equals("content")){
+            if(pm.getPostsByContent(pattern).isEmpty()){
+                return "redirect:/error/No matches found!";
+            }
+            model.addAttribute("posts", pm.getPostsByContent(pattern));
+        }
+        if(type.equals("author")){
+            if(pm.getPostsByAuthors(pam.getByAuthors(aum.getAuthorsByUsername(pattern))).isEmpty()){
+                return "redirect:/error/No matches found!";
+            }
+            model.addAttribute("posts", pm.getPostsByAuthors(pam.getByAuthors(aum.getAuthorsByUsername(pattern))));
+        }
+        if(type.equals("tags")){
+            if(pm.getPostsByTags(pattern).isEmpty()){
+                return "redirect:/error/No matches found!";
+            }
+            model.addAttribute("posts", pm.getPostsByTags(pattern));
+        }
+        model.addAttribute("pa", pam.getAllPostsAuthors());
+        model.addAttribute("authors", aum.getAllAuthors());
+        model.addAttribute("comments", cm.getAllComments());
+        return "homePage";
     }
 }

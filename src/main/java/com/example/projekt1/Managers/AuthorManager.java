@@ -14,6 +14,8 @@ import java.io.FileReader;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class AuthorManager implements AuthorIterface {
@@ -72,10 +74,30 @@ public class AuthorManager implements AuthorIterface {
 
     @Override
     public List<Author> getAuthorsByPostId(List<Posts_Authors> pa){
-        List<Author> authorsToReturn = null;
+        List<Author> authorsToReturn = new ArrayList<>();
         for(Posts_Authors par: pa){
             for(Author author: authors){
                 if(author.getId() == par.getId_author()){
+                    authorsToReturn.add(author);
+                }
+            }
+        }
+        return authorsToReturn;
+    }
+
+    @Override
+    public List<Author> getAuthorsByUsername(String usernameInput){
+        List<Author> authorsToReturn = new ArrayList<>();
+        String[] usernames = usernameInput.split(" ");
+        Pattern pattern;
+        Matcher matcher;
+        boolean matchFound;
+        for(Author author: authors){
+            for(String username: usernames){
+                pattern = Pattern.compile(username, Pattern.CASE_INSENSITIVE);
+                matcher = pattern.matcher(author.getUsername());
+                matchFound = matcher.find();
+                if(matchFound){
                     authorsToReturn.add(author);
                 }
             }

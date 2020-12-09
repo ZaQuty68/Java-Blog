@@ -1,6 +1,7 @@
 package com.example.projekt1.Managers;
 
 import com.example.projekt1.Interfaces.Posts_AuthorsInterface;
+import com.example.projekt1.Models.Author;
 import com.example.projekt1.Models.Post;
 import com.example.projekt1.Models.Posts_Authors;
 import com.opencsv.bean.CsvToBean;
@@ -62,11 +63,13 @@ public class Posts_AuthorsManager implements Posts_AuthorsInterface {
     }
 
     @Override
-    public List<Posts_Authors> getByAuthorId(int id){
+    public List<Posts_Authors> getByAuthors(List<Author> authors){
         List<Posts_Authors> parsToReturn = new ArrayList<>();
-        for(Posts_Authors par: pa){
-            if(par.getId_author() == id){
-                parsToReturn.add(par);
+        for(Author author: authors){
+            for(Posts_Authors par: pa){
+                if(par.getId_author() == author.getId()){
+                    parsToReturn.add(par);
+                }
             }
         }
         return parsToReturn;

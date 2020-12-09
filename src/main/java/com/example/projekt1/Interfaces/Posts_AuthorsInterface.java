@@ -1,5 +1,6 @@
 package com.example.projekt1.Interfaces;
 
+import com.example.projekt1.Models.Author;
 import com.example.projekt1.Models.Posts_Authors;
 
 import java.util.List;
@@ -14,7 +15,7 @@ public interface Posts_AuthorsInterface {
 
     List<Posts_Authors> getByPostId(int id);
 
-    List<Posts_Authors> getByAuthorId(int id);
+    List<Posts_Authors> getByAuthors(List<Author> authors);
 
     boolean checkForAuthor(int id);
 

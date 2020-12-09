@@ -1,13 +1,18 @@
 package com.example.projekt1.Managers;
 
 import com.example.projekt1.Interfaces.PostInterface;
+import com.example.projekt1.Models.Author;
 import com.example.projekt1.Models.Post;
+import com.example.projekt1.Models.Posts_Authors;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class PostManager implements PostInterface {
@@ -62,5 +67,58 @@ public class PostManager implements PostInterface {
             }
         }
         return false;
+    }
+
+    @Override
+    public List<Post> getPostsByContent(String contentInput){
+        List<Post> postsToReturn = new ArrayList<>();
+        String[] contents = contentInput.split(" ");
+        Pattern pattern;
+        Matcher matcher;
+        boolean matchFound;
+        for(Post post: posts){
+            for(String content: contents){
+                pattern = Pattern.compile(content, Pattern.CASE_INSENSITIVE);
+                matcher = pattern.matcher(post.getPost_content());
+                matchFound = matcher.find();
+                if(matchFound){
+                    postsToReturn.add(post);
+                }
+            }
+        }
+        return postsToReturn;
+    }
+
+    @Override
+    public List<Post> getPostsByTags(String tagsInput){
+        List<Post> postsToReturn = new ArrayList<>();
+        String[] tags = tagsInput.split(" ");
+        Pattern pattern;
+        Matcher matcher;
+        boolean matchFound;
+        for(Post post: posts){
+            for(String tag: tags){
+                pattern = Pattern.compile(tag, Pattern.CASE_INSENSITIVE);
+                matcher = pattern.matcher(post.getTags());
+                matchFound = matcher.find();
+                if(matchFound){
+                    postsToReturn.add(post);
+                }
+            }
+        }
+        return postsToReturn;
+    }
+
+    @Override
+    public List<Post> getPostsByAuthors(List<Posts_Authors> pa){
+        List<Post> postsToReturn = new ArrayList<>();
+        for(Posts_Authors par: pa){
+            for(Post post: posts){
+                if(post.getId() == par.getId_post()){
+                    postsToReturn.add(post);
+                }
+            }
+        }
+        return postsToReturn;
     }
 }

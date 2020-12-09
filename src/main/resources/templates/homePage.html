@@ -6,6 +6,23 @@
 </head>
 <body>
     <h1>Welcome to my blog!</h1>
+    <div>
+        <form method="POST" th:action="@{/searchPost}">
+            <label for="type">Search posts by:</label>
+            <select th:value="${type}" name="type" id="type" required="required">
+                <option th:value="content" th:text="${'Post content'}"/>
+                <option th:value="author" th:text="${'Author'}"/>
+                <option th:value="tags" th:text="${'Tag'}"/>
+            </select>
+            <br/>
+
+            <input type="text" name="pattern" id="pattern"/>
+            <br/>
+
+            <input type="submit" value="Search"/>
+        </form>
+    </div>
+    <br/>
     <a th:href="@{/addPost}">Add new post</a>
     <h2>Here are all the posts:</h2>
     <div th:each="post : ${posts}">

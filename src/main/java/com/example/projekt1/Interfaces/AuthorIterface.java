@@ -18,4 +18,6 @@ public interface AuthorIterface {
     boolean checkAuthor(int id);
 
     List<Author> getAuthorsByPostId(List<Posts_Authors> pa);
+
+    List<Author> getAuthorsByUsername(String pattern);
 }
