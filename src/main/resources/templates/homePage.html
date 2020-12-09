@@ -31,8 +31,37 @@
         <p>Authors: <span th:each="par : ${pa}" th:if="${par.id_post == post.id}"><span th:each="author : ${authors}" th:text="${par.id_author == author.id ? author.username : ''} + ${' '}"/></span></p>
         <p th:text = "${post.post_content}"/>
         <p th:text="${'Tags: '} + ${post.tags}"/>
+
+        <form method="POST" th:action="@{/addComment/{id}(id=${post.id})}" th:object="${comment}">
+            <div th:if="${#fields.hasErrors() and post.id == postIdForCommentErrors}">
+                <span class="ValidationError">
+                    Please correct following errors:
+                </span>
+            </div>
+
+            <label for="username">Username: </label>
+            <input type="text" th:field="*{username}"/>
+            <span th:if="${#fields.hasErrors('username') and post.id == postIdForCommentErrors}"
+                  th:errors="*{username}">Username Error
+            </span>
+            <br/>
+
+            <label for="comment_content">Comment content: </label>
+            <input type="text" th:field="*{comment_content}"/>
+            <span th:if="${#fields.hasErrors('comment_content') and post.id == postIdForCommentErrors}"
+                  th:errors="*{comment_content}">Comment content Error
+            </span>
+            <br/>
+
+            <input type="submit" value="Comment"/>
+        </form>
+
         <p>Comments:</p>
-        <p th:each="comment :${comments}" th:text="${post.id == comment.id_post ? comment.comment_content : ''}"/>
+        <div th:each="comment :${comments}" th:if="${post.id == comment.id_post}">
+            <p th:text="${comment.username + ': ' + comment.comment_content}"/>
+            <a th:href="@{/editComment/{id}(id=${comment.id})}">Edit this comment</a>
+            <a th:href="@{/deleteCommentConfirm/{id}(id=${comment.id})}">Delete this comment</a>
+        </div>
     </div>
 </body>
 </html>

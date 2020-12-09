@@ -7,7 +7,6 @@
 <body>
     <h1>Adding new post</h1>
     <form method="POST" th:action="@{/addPost}" th:object="${post}">
-        <h1>Creating new post</h1>
         <div th:if="${#fields.hasErrors()}">
             <span class="ValidationError">
                 Please correct following errors:

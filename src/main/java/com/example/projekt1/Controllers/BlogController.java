@@ -1,6 +1,7 @@
 package com.example.projekt1.Controllers;
 
 import com.example.projekt1.Managers.*;
+import com.example.projekt1.Models.Comment;
 import com.example.projekt1.Models.Post;
 import com.example.projekt1.Models.Posts_Authors;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +16,7 @@ import java.util.List;
 
 @Controller
 public class BlogController {
-    private int pid=150;
+    private int pid=150, cid=200;
 
     @Autowired
     AttachmentManager atm;
@@ -35,6 +36,8 @@ public class BlogController {
         model.addAttribute("pa", pam.getAllPostsAuthors());
         model.addAttribute("authors", aum.getAllAuthors());
         model.addAttribute("comments", cm.getAllComments());
+        model.addAttribute("comment", new Comment());
+        model.addAttribute("postIdForCommentErrors", -1);
         return "homePage";
     }
 
@@ -101,7 +104,9 @@ public class BlogController {
             return "redirect:/error/This post does not exist!";
         }
         if(errors.hasErrors()){
+            model.addAttribute("pa", pam.getAllPostsAuthors());
             model.addAttribute("authors", aum.getAllAuthors());
+            model.addAttribute("comments", cm.getAllComments());
             return "editPost";
         }
         Post postToEdit = pm.getPostById(id);
@@ -149,6 +154,77 @@ public class BlogController {
         model.addAttribute("pa", pam.getAllPostsAuthors());
         model.addAttribute("authors", aum.getAllAuthors());
         model.addAttribute("comments", cm.getAllComments());
+        model.addAttribute("postIdForCommentErrors", -1);
+        model.addAttribute("comment", new Comment());
         return "homePage";
+    }
+
+    @PostMapping("/addComment/{id}")
+    public String addComment(@Valid Comment comment, Errors errors, Model model, @PathVariable int id){
+        if(!pm.checkPost(id)){
+            return "redirect:/error/This post does not exist!";
+        }
+        if(errors.hasErrors()){
+            model.addAttribute("posts", pm.getAllPosts());
+            model.addAttribute("pa", pam.getAllPostsAuthors());
+            model.addAttribute("authors", aum.getAllAuthors());
+            model.addAttribute("comments", cm.getAllComments());
+            model.addAttribute("postIdForCommentErrors", id);
+            return "homePage";
+        }
+        cid++;
+        comment.setId(cid);
+        comment.setId_post(id);
+        cm.addComment(comment);
+        return "redirect:/";
+    }
+    @GetMapping("/editComment/{id}")
+    public String editComment(Model model, @PathVariable int id){
+        if(!cm.checkComment(id)){
+            return "redirect:/error/This comment does not exist!";
+        }
+        model.addAttribute("post", pm.getPostById(cm.getCommentById(id).getId_post()));
+        model.addAttribute("pa", pam.getAllPostsAuthors());
+        model.addAttribute("authors", aum.getAllAuthors());
+        model.addAttribute("comments", cm.getAllComments());
+        model.addAttribute("comment", cm.getCommentById(id));
+        return "editComment";
+    }
+    @PostMapping("/editComment/{id}")
+    public String processEditComment(@Valid Comment comment, Errors errors, Model model, @PathVariable int id){
+        if(!cm.checkComment(id)){
+            return "redirect:/error/This comment does not exist!";
+        }
+        if(errors.hasErrors()){
+            model.addAttribute("post", pm.getPostById(cm.getCommentById(id).getId_post()));
+            model.addAttribute("pa", pam.getAllPostsAuthors());
+            model.addAttribute("authors", aum.getAllAuthors());
+            model.addAttribute("comments", cm.getAllComments());
+            return "editComment";
+        }
+        Comment commentToEdit = cm.getCommentById(id);
+        commentToEdit.setComment_content(comment.getComment_content());
+        commentToEdit.setUsername(comment.getUsername());
+        return "redirect:/";
+    }
+    @GetMapping("/deleteCommentConfirm/{id}")
+    public String deleteCommentConfirm(Model model, @PathVariable int id){
+        if(!cm.checkComment(id)){
+            return "redirect:/error/This comment does not exist!";
+        }
+        model.addAttribute("post", pm.getPostById(cm.getCommentById(id).getId_post()));
+        model.addAttribute("pa", pam.getAllPostsAuthors());
+        model.addAttribute("authors", aum.getAllAuthors());
+        model.addAttribute("comments", cm.getAllComments());
+        model.addAttribute("comment", cm.getCommentById(id));
+        return "deleteCommentConfirm";
+    }
+    @GetMapping("/deleteComment/{id}")
+    public String deleteComment(Model model, @PathVariable int id){
+        if(!cm.checkComment(id)){
+            return "redirect:/error/This comment does not exist!";
+        }
+        cm.deleteComment(id);
+        return "redirect:/";
     }
 }

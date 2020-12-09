@@ -11,7 +11,7 @@ import javax.validation.constraints.Size;
 public class Post {
     private int id;
     @NotNull(message = "This field is required")
-    @Size(min = 3, message = "Minimal postl lenght is 3 characters")
+    @Size(min = 3, message = "Minimal post length is 3 characters")
     private String post_content;
     @NotNull(message = "Please add at least one tag")
     @Tags
