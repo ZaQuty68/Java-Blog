@@ -227,4 +227,51 @@ public class BlogController {
         cm.deleteComment(id);
         return "redirect:/";
     }
+    @PostMapping("/searchUser")
+    public String searchUser(Model model, String username){
+        if(username.length() == 0){
+            return "redirect:/";
+        }
+        model.addAttribute("comments", cm.getCommentsByUsername(username));
+        model.addAttribute("i", cm.getCommentsByUsername(username).size());
+        return "searchUser";
+    }
+    @GetMapping("/userPage/{username}")
+    public String userPage(Model model, @PathVariable String username){
+        if(!cm.checkCommentsByUsername(username)){
+            return "redirect:/error/This user does not exist!";
+        }
+        model.addAttribute("i", cm.getCommentsByUsername(username).size());
+        model.addAttribute("posts", pm.getAllPosts());
+        model.addAttribute("comments", cm.getCommentsByUsername(username));
+        model.addAttribute("username", username);
+        return "userPage";
+    }
+    @GetMapping("/postPage/{id}")
+    public String postPage(Model model, @PathVariable int id){
+        if(!pm.checkPost(id)){
+            return "redirect:/error/This post does not exist!";
+        }
+        model.addAttribute("post", pm.getPostById(id));
+        model.addAttribute("pa", pam.getAllPostsAuthors());
+        model.addAttribute("authors", aum.getAllAuthors());
+        model.addAttribute("comments", cm.getAllComments());
+        return "postPage";
+    }
+    @GetMapping("/authorPage/{id}")
+    public String authorPage(Model model, @PathVariable int id){
+        if(!aum.checkAuthor(id)){
+            return "redirect:/error/This author does not exist!";
+        }
+        model.addAttribute("author", aum.getAuthorById(id));
+        if(pam.getByAuthor(aum.getAuthorById(id)).isEmpty()){
+            return "redirect:/error/This author have no posts!";
+        }
+        model.addAttribute("posts", pm.getPostsByAuthors(pam.getByAuthor(aum.getAuthorById(id))));
+        model.addAttribute("comments", cm.getAllComments());
+        model.addAttribute("pa", pam.getAllPostsAuthors());
+        model.addAttribute("authors", aum.getAllAuthors());
+        model.addAttribute("i", pm.getPostsByAuthors(pam.getByAuthor(aum.getAuthorById(id))).size());
+        return "authorPage";
+    }
 }

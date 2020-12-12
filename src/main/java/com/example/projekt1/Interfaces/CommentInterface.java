@@ -18,6 +18,10 @@ public interface CommentInterface {
 
     boolean checkComment(int id);
 
+    List<Comment> getCommentsByUsername(String username);
+
+    boolean checkCommentsByUsername(String username);
+
     List<Comment> getCommentsByPostId(int id);
 
     boolean checkCommentsByPostId(int id);

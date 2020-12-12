@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>User search</title>
+</head>
+<body>
+<h1 th:text="${i == 1 ? 'Found 1 match!' : 'Found ' + i + ' matches:'}"/>
+<span th:each="comment :${comments}"><a th:text="${comment.username}" th:href="@{/userPage/{username}(username=${comment.username})}"/> </span>
+<br/>
+<a th:href="@{/}">Cancel</a>
+</body>
+</html>

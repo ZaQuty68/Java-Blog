@@ -5,6 +5,7 @@ import com.example.projekt1.Models.Comment;
 import com.example.projekt1.Models.Post;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
+import javafx.css.Match;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
@@ -13,6 +14,8 @@ import java.io.FileReader;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class CommentManager implements CommentInterface {
@@ -37,7 +40,7 @@ public class CommentManager implements CommentInterface {
 
     @Override
     public void deleteCommentsByPostId(int id){
-        List<Comment> commentsToDelete = null;
+        List<Comment> commentsToDelete = new ArrayList<>();
         for(Comment comment: comments){
             if(comment.getId_post() == id){
                 commentsToDelete.add(comment);
@@ -82,6 +85,37 @@ public class CommentManager implements CommentInterface {
             }
         }
         return false;
+    }
+
+    @Override
+    public List<Comment> getCommentsByUsername(String username){
+        List<Comment> commentsToReturn = new ArrayList<>();
+        Pattern pattern = Pattern.compile(username, Pattern.CASE_INSENSITIVE);
+        Matcher matcher;
+        boolean matchFound;
+        for(Comment comment: comments){
+            matcher = pattern.matcher(comment.getUsername());
+            matchFound = matcher.find();
+            if(matchFound){
+                commentsToReturn.add(comment);
+            }
+        }
+        return commentsToReturn;
+    }
+
+    @Override
+    public boolean checkCommentsByUsername(String username){
+        Pattern pattern = Pattern.compile("^" + username + "$");
+        Matcher matcher;
+        boolean matchFound, flag=false;
+        for(Comment comment: comments){
+            matcher = pattern.matcher(comment.getUsername());
+            matchFound = matcher.find();
+            if(matchFound){
+                flag=true;
+            }
+        }
+        return flag;
     }
 
     @Override

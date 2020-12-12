@@ -76,6 +76,17 @@ public class Posts_AuthorsManager implements Posts_AuthorsInterface {
     }
 
     @Override
+    public List<Posts_Authors> getByAuthor(Author author){
+        List<Posts_Authors> parsToReturn = new ArrayList<>();
+        for(Posts_Authors par: pa){
+            if(par.getId_author() == author.getId()){
+                parsToReturn.add(par);
+            }
+        }
+        return parsToReturn;
+    }
+
+    @Override
     public boolean checkForAuthor(int id){
         for(Posts_Authors par: pa){
             if(par.getId_author() == id){

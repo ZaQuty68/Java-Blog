@@ -17,6 +17,8 @@ public interface Posts_AuthorsInterface {
 
     List<Posts_Authors> getByAuthors(List<Author> authors);
 
+    List<Posts_Authors> getByAuthor(Author author);
+
     boolean checkForAuthor(int id);
 
     boolean checkForPost(int id);
