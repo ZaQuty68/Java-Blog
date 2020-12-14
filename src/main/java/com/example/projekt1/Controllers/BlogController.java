@@ -4,13 +4,19 @@ import com.example.projekt1.Managers.*;
 import com.example.projekt1.Models.Comment;
 import com.example.projekt1.Models.Post;
 import com.example.projekt1.Models.Posts_Authors;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -274,4 +280,44 @@ public class BlogController {
         model.addAttribute("i", pm.getPostsByAuthors(pam.getByAuthor(aum.getAuthorById(id))).size());
         return "authorPage";
     }
+    @GetMapping(value = "/post/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> postJson(@PathVariable int id){
+        JSONObject postJson = new JSONObject();
+        if(!pm.checkPost(id)){
+            postJson.put("message", "This post does not exist!");
+            return  new ResponseEntity<Object>(postJson, HttpStatus.OK);
+        }
+        Post post = pm.getPostById(id);
+        postJson.put("id", post.getId());
+        postJson.put("post_content", post.getPost_content());
+        postJson.put("tags", post.getTags());
+        return new ResponseEntity<Object>(post, HttpStatus.OK);
+    }
+    /*@GetMapping(value = "/posts/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> postsJson(@PathVariable int id){
+        JSONArray postsJson = new JSONArray();
+        if(!aum.checkAuthor(id)){
+            JSONObject postJson = new JSONObject();
+            postJson.put("message", "This author does not exist!");
+            postsJson.put(postJson);
+            return new ResponseEntity<Object>(postsJson, HttpStatus.OK);
+        }
+        if(pam.getByAuthor(aum.getAuthorById(id)).isEmpty()){
+            JSONObject postJson = new JSONObject();
+            postJson.put("message", "This author has no posts!");
+            postsJson.put(postJson);
+            return new ResponseEntity<Object>(postsJson, HttpStatus.OK);
+        }
+        List<Post> posts = pm.getPostsByAuthors(pam.getByAuthor(aum.getAuthorById(id)));
+        for(Post post: posts){
+            JSONObject postJson = new JSONObject();
+            postJson.put("id", post.getId());
+            postJson.put("post_content", post.getPost_content());
+            postJson.put("tags", post.getTags());
+            postsJson.put(postJson);
+        }
+        JSONObject jo = new JSONObject();
+        jo.put("cos", "cos");
+        return new ResponseEntity<Object>(jo, HttpStatus.OK);
+    }*/
 }
