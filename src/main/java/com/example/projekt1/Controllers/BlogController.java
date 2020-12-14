@@ -1,12 +1,15 @@
 package com.example.projekt1.Controllers;
 
 import com.example.projekt1.Managers.*;
+import com.example.projekt1.Models.Attachment;
 import com.example.projekt1.Models.Comment;
 import com.example.projekt1.Models.Post;
 import com.example.projekt1.Models.Posts_Authors;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +17,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
@@ -34,8 +38,11 @@ public class BlogController {
     Posts_AuthorsManager pam;
     @Autowired
     PostManager pm;
+    @Autowired
+    StorageManager sm;
 
 
+    //////////////////////////////////////////////////////////////////////////////////////////////////////MAIN PAGE/////////////////////////////////////////
     @GetMapping("/")
     public String homePage(Model model){
         model.addAttribute("posts", pm.getAllPosts());
@@ -44,9 +51,11 @@ public class BlogController {
         model.addAttribute("comments", cm.getAllComments());
         model.addAttribute("comment", new Comment());
         model.addAttribute("postIdForCommentErrors", -1);
+        model.addAttribute("attachments", atm.getAllAttachments());
         return "homePage";
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////ADDING///////////////////////////////////////////////////////
     @GetMapping("/addPost")
     public String addPost(Model model){
         model.addAttribute("post", new Post());
@@ -54,12 +63,19 @@ public class BlogController {
         return "addPost";
     }
     @PostMapping("/addPost")
-    public String processAddingPost(@Valid Post post, Errors errors, int[] id, Model model){
+    public String processAddingPost(@Valid Post post, Errors errors, int[] id, Model model, @RequestParam("file") MultipartFile file){
         if(errors.hasErrors()){
             model.addAttribute("authors", aum.getAllAuthors());
             return "addPost";
         }
         pid++;
+        if(!file.isEmpty()){
+            sm.store(file);
+            Attachment attachment = new Attachment();
+            attachment.setFilename(file.getOriginalFilename());
+            attachment.setId_post(pid);
+            atm.addAttachment(attachment);
+        }
         post.setId(pid);
         pm.addPost(post);
         if(id.length != 0){
@@ -72,6 +88,29 @@ public class BlogController {
         }
         return "redirect:/";
     }
+
+    @PostMapping("/addComment/{id}")
+    public String addComment(@Valid Comment comment, Errors errors, Model model, @PathVariable int id){
+        if(!pm.checkPost(id)){
+            return "redirect:/error/This post does not exist!";
+        }
+        if(errors.hasErrors()){
+            model.addAttribute("posts", pm.getAllPosts());
+            model.addAttribute("pa", pam.getAllPostsAuthors());
+            model.addAttribute("authors", aum.getAllAuthors());
+            model.addAttribute("comments", cm.getAllComments());
+            model.addAttribute("postIdForCommentErrors", id);
+            model.addAttribute("attachments", atm.getAllAttachments());
+            return "homePage";
+        }
+        cid++;
+        comment.setId(cid);
+        comment.setId_post(id);
+        cm.addComment(comment);
+        return "redirect:/";
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////DELETING//////////////////
     @GetMapping("/deletePostConfirm/{id}")
     public String deletePostConfirm(Model model, @PathVariable int id){
         if(!pm.checkPost(id)){
@@ -81,6 +120,7 @@ public class BlogController {
         model.addAttribute("pa", pam.getAllPostsAuthors());
         model.addAttribute("authors", aum.getAllAuthors());
         model.addAttribute("comments", cm.getAllComments());
+        model.addAttribute("attachments", atm.getAllAttachments());
         return "deletePostConfirm";
     }
     @RequestMapping(value = "/deletePost/{id}", method = RequestMethod.GET)
@@ -91,8 +131,33 @@ public class BlogController {
         pm.deletePost(id);
         pam.deleteByPostId(id);
         cm.deleteCommentsByPostId(id);
+        atm.deleteAttachments(id);
         return "redirect:/";
     }
+
+    @GetMapping("/deleteCommentConfirm/{id}")
+    public String deleteCommentConfirm(Model model, @PathVariable int id){
+        if(!cm.checkComment(id)){
+            return "redirect:/error/This comment does not exist!";
+        }
+        model.addAttribute("post", pm.getPostById(cm.getCommentById(id).getId_post()));
+        model.addAttribute("pa", pam.getAllPostsAuthors());
+        model.addAttribute("authors", aum.getAllAuthors());
+        model.addAttribute("comments", cm.getAllComments());
+        model.addAttribute("comment", cm.getCommentById(id));
+        model.addAttribute("attachments", atm.getAllAttachments());
+        return "deleteCommentConfirm";
+    }
+    @GetMapping("/deleteComment/{id}")
+    public String deleteComment(Model model, @PathVariable int id){
+        if(!cm.checkComment(id)){
+            return "redirect:/error/This comment does not exist!";
+        }
+        cm.deleteComment(id);
+        return "redirect:/";
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////EDITING////////////////
     @GetMapping("/editPost/{id}")
     public String editPost(Model model, @PathVariable int id){
         if(!pm.checkPost(id)){
@@ -102,6 +167,7 @@ public class BlogController {
         model.addAttribute("pa", pam.getAllPostsAuthors());
         model.addAttribute("authors", aum.getAllAuthors());
         model.addAttribute("comments", cm.getAllComments());
+        model.addAttribute("attachments", atm.getAllAttachments());
         return "editPost";
     }
     @PostMapping("/editPost/{id}")
@@ -129,11 +195,40 @@ public class BlogController {
         }
         return "redirect:/";
     }
-    @GetMapping("/error/{message}")
-    public String errorMessage(Model model, @PathVariable String message){
-        model.addAttribute("message", message);
-        return "errorMessage";
+
+    @GetMapping("/editComment/{id}")
+    public String editComment(Model model, @PathVariable int id){
+        if(!cm.checkComment(id)){
+            return "redirect:/error/This comment does not exist!";
+        }
+        model.addAttribute("post", pm.getPostById(cm.getCommentById(id).getId_post()));
+        model.addAttribute("pa", pam.getAllPostsAuthors());
+        model.addAttribute("authors", aum.getAllAuthors());
+        model.addAttribute("comments", cm.getAllComments());
+        model.addAttribute("comment", cm.getCommentById(id));
+        model.addAttribute("attachments", atm.getAllAttachments());
+        return "editComment";
     }
+    @PostMapping("/editComment/{id}")
+    public String processEditComment(@Valid Comment comment, Errors errors, Model model, @PathVariable int id){
+        if(!cm.checkComment(id)){
+            return "redirect:/error/This comment does not exist!";
+        }
+        if(errors.hasErrors()){
+            model.addAttribute("post", pm.getPostById(cm.getCommentById(id).getId_post()));
+            model.addAttribute("pa", pam.getAllPostsAuthors());
+            model.addAttribute("authors", aum.getAllAuthors());
+            model.addAttribute("comments", cm.getAllComments());
+            model.addAttribute("attachments", atm.getAllAttachments());
+            return "editComment";
+        }
+        Comment commentToEdit = cm.getCommentById(id);
+        commentToEdit.setComment_content(comment.getComment_content());
+        commentToEdit.setUsername(comment.getUsername());
+        return "redirect:/";
+    }
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////SEARCHING////////////////////////////
     @PostMapping("/searchPost")
     public String searchPost(Model model, String type, String pattern){
         if(pattern.length() == 0){
@@ -162,77 +257,10 @@ public class BlogController {
         model.addAttribute("comments", cm.getAllComments());
         model.addAttribute("postIdForCommentErrors", -1);
         model.addAttribute("comment", new Comment());
+        model.addAttribute("attachments", atm.getAllAttachments());
         return "homePage";
     }
 
-    @PostMapping("/addComment/{id}")
-    public String addComment(@Valid Comment comment, Errors errors, Model model, @PathVariable int id){
-        if(!pm.checkPost(id)){
-            return "redirect:/error/This post does not exist!";
-        }
-        if(errors.hasErrors()){
-            model.addAttribute("posts", pm.getAllPosts());
-            model.addAttribute("pa", pam.getAllPostsAuthors());
-            model.addAttribute("authors", aum.getAllAuthors());
-            model.addAttribute("comments", cm.getAllComments());
-            model.addAttribute("postIdForCommentErrors", id);
-            return "homePage";
-        }
-        cid++;
-        comment.setId(cid);
-        comment.setId_post(id);
-        cm.addComment(comment);
-        return "redirect:/";
-    }
-    @GetMapping("/editComment/{id}")
-    public String editComment(Model model, @PathVariable int id){
-        if(!cm.checkComment(id)){
-            return "redirect:/error/This comment does not exist!";
-        }
-        model.addAttribute("post", pm.getPostById(cm.getCommentById(id).getId_post()));
-        model.addAttribute("pa", pam.getAllPostsAuthors());
-        model.addAttribute("authors", aum.getAllAuthors());
-        model.addAttribute("comments", cm.getAllComments());
-        model.addAttribute("comment", cm.getCommentById(id));
-        return "editComment";
-    }
-    @PostMapping("/editComment/{id}")
-    public String processEditComment(@Valid Comment comment, Errors errors, Model model, @PathVariable int id){
-        if(!cm.checkComment(id)){
-            return "redirect:/error/This comment does not exist!";
-        }
-        if(errors.hasErrors()){
-            model.addAttribute("post", pm.getPostById(cm.getCommentById(id).getId_post()));
-            model.addAttribute("pa", pam.getAllPostsAuthors());
-            model.addAttribute("authors", aum.getAllAuthors());
-            model.addAttribute("comments", cm.getAllComments());
-            return "editComment";
-        }
-        Comment commentToEdit = cm.getCommentById(id);
-        commentToEdit.setComment_content(comment.getComment_content());
-        commentToEdit.setUsername(comment.getUsername());
-        return "redirect:/";
-    }
-    @GetMapping("/deleteCommentConfirm/{id}")
-    public String deleteCommentConfirm(Model model, @PathVariable int id){
-        if(!cm.checkComment(id)){
-            return "redirect:/error/This comment does not exist!";
-        }
-        model.addAttribute("post", pm.getPostById(cm.getCommentById(id).getId_post()));
-        model.addAttribute("pa", pam.getAllPostsAuthors());
-        model.addAttribute("authors", aum.getAllAuthors());
-        model.addAttribute("comments", cm.getAllComments());
-        model.addAttribute("comment", cm.getCommentById(id));
-        return "deleteCommentConfirm";
-    }
-    @GetMapping("/deleteComment/{id}")
-    public String deleteComment(Model model, @PathVariable int id){
-        if(!cm.checkComment(id)){
-            return "redirect:/error/This comment does not exist!";
-        }
-        cm.deleteComment(id);
-        return "redirect:/";
-    }
     @PostMapping("/searchUser")
     public String searchUser(Model model, String username){
         if(username.length() == 0){
@@ -242,6 +270,8 @@ public class BlogController {
         model.addAttribute("i", cm.getCommentsByUsername(username).size());
         return "searchUser";
     }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////SHOWING/////////////////
     @GetMapping("/userPage/{username}")
     public String userPage(Model model, @PathVariable String username){
         if(!cm.checkCommentsByUsername(username)){
@@ -253,6 +283,7 @@ public class BlogController {
         model.addAttribute("username", username);
         return "userPage";
     }
+
     @GetMapping("/postPage/{id}")
     public String postPage(Model model, @PathVariable int id){
         if(!pm.checkPost(id)){
@@ -262,8 +293,10 @@ public class BlogController {
         model.addAttribute("pa", pam.getAllPostsAuthors());
         model.addAttribute("authors", aum.getAllAuthors());
         model.addAttribute("comments", cm.getAllComments());
+        model.addAttribute("attachments", atm.getAllAttachments());
         return "postPage";
     }
+
     @GetMapping("/authorPage/{id}")
     public String authorPage(Model model, @PathVariable int id){
         if(!aum.checkAuthor(id)){
@@ -278,8 +311,52 @@ public class BlogController {
         model.addAttribute("pa", pam.getAllPostsAuthors());
         model.addAttribute("authors", aum.getAllAuthors());
         model.addAttribute("i", pm.getPostsByAuthors(pam.getByAuthor(aum.getAuthorById(id))).size());
+        model.addAttribute("attachments", atm.getAllAttachments());
         return "authorPage";
     }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////HANDLING ERRORS/////////////////////////
+    @GetMapping("/error/{message}")
+    public String errorMessage(Model model, @PathVariable String message){
+        model.addAttribute("message", message);
+        return "errorMessage";
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////HANDLING FILES///////////////////////
+    @GetMapping("/files/{filename:.+}")
+    @ResponseBody
+    public ResponseEntity<Resource> serveFile(@PathVariable String filename){
+        Resource file = sm.loadAsResource(filename);
+        return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename() + "\"").body(file);
+    }
+
+    @PostMapping("/addAttachment/{id}")
+    public String addAttachment(@PathVariable int id, @RequestParam("file") MultipartFile file){
+        if(!pm.checkPost(id)){
+            return "redirect:/error/This post does not exist!";
+        }
+        if(!file.isEmpty()){
+            sm.store(file);
+            Attachment attachment = new Attachment();
+            attachment.setFilename(file.getOriginalFilename());
+            attachment.setId_post(id);
+            atm.addAttachment(attachment);
+        }
+        return "redirect:/editPost/" + id;
+    }
+
+    @GetMapping("/deleteAttachment/{id}/{filename}")
+    public String deleteAttachment(@PathVariable int id, @PathVariable String filename){
+        if(!pm.checkPost(id)){
+            return "redirect:/error/This post does not exist!";
+        }
+        if(!filename.isEmpty()){
+            atm.deleteAttachment(id, filename);
+        }
+        return "redirect:/editPost/" + id;
+    }
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////JSON////////////////////////////
     @GetMapping(value = "/post/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> postJson(@PathVariable int id){
         JSONObject postJson = new JSONObject();

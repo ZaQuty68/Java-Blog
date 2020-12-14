@@ -14,5 +14,7 @@ public interface AttachmentInterface {
 
     void deleteAttachments(int id);
 
+    void deleteAttachment(int id, String filename);
+
     boolean checkAttachment(int id);
 }

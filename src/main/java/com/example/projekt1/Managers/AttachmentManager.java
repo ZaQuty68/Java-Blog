@@ -55,7 +55,24 @@ public class AttachmentManager implements AttachmentInterface {
             }
         }
         if (!attachmentsToDelete.isEmpty()){
-            for (Attachment attachment: attachments){
+            for (Attachment attachment: attachmentsToDelete){
+                attachments.remove(attachment);
+            }
+        }
+    }
+
+    @Override
+    public void deleteAttachment(int id, String filename){
+        List<Attachment> attachmentsToDelete = new ArrayList<>();
+        for (Attachment attachment: attachments){
+            if(attachment.getId_post() == id){
+                if(attachment.getFilename().matches("^" + filename + "$")){
+                    attachmentsToDelete.add(attachment);
+                }
+            }
+        }
+        if(!attachmentsToDelete.isEmpty()){
+            for(Attachment attachment: attachmentsToDelete){
                 attachments.remove(attachment);
             }
         }

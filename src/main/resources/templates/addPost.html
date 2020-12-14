@@ -6,7 +6,7 @@
 </head>
 <body>
     <h1>Adding new post</h1>
-    <form method="POST" th:action="@{/addPost}" th:object="${post}">
+    <form method="POST" enctype="multipart/form-data" th:action="@{/addPost}" th:object="${post}">
         <div th:if="${#fields.hasErrors()}">
             <span class="ValidationError">
                 Please correct following errors:
@@ -25,6 +25,10 @@
               th:if="${#fields.hasErrors('post_content')}"
               th:errors="*{post_content}">Post content Error
         </span>
+        <br/>
+
+        <label for="file">Attachment to upload:</label>
+        <input type="file" name="file"/>
         <br/>
 
         <label for="tags">Tags:</label>

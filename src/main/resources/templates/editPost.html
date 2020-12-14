@@ -38,6 +38,23 @@
     <br/>
     <input type="submit" value="Submit"/>
 </form>
+<div >
+    <p>Attachments: </p>
+    <table>
+        <tr th:each="attachment : ${attachments}" th:if="${attachment.id_post == post.id}">
+            <td><a th:text="${attachment.filename}" th:href="@{/files/{filename}(filename=${attachment.filename})}"/></td>
+            <td><a th:href="@{/deleteAttachment/{id}/{filename}(id=${post.id}, filename=${attachment.filename})}">Delete this attachment</a></td>
+        </tr>
+    </table>
+</div>
+<form method="POST" enctype="multipart/form-data" th:action="@{/addAttachment/{id}(id=${post.id})}">
+    <table>
+        <tr><td>Attachment to upload:</td><td><input type="file" name="file" /></td></tr>
+        <tr><td></td><td><input type="submit" value="Upload" /></td></tr>
+    </table>
+</form>
+
+<br/>
 <a th:href="@{'/'}">Cancel</a>
 <p>Comments:</p>
 <div th:each="comment :${comments}" th:if="${post.id == comment.id_post}">

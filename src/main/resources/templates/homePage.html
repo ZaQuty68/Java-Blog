@@ -6,6 +6,8 @@
 </head>
 <body>
     <h1>Welcome to my blog!</h1>
+
+
     <div>
         <form method="POST" th:action="@{/searchPost}">
             <label for="type">Search for posts by:</label>
@@ -22,6 +24,8 @@
             <input type="submit" value="Search"/>
         </form>
     </div>
+
+
     <div>
         <form method="POST" th:action="@{/searchUser}">
             <label for="username">Search for user: </label>
@@ -34,13 +38,17 @@
     </div>
     <br/>
     <a th:href="@{/addPost}">Add new post</a>
+
+
     <h2>Here are all the posts:</h2>
     <div th:each="post : ${posts}">
         <a th:href="@{/deletePostConfirm/{id}(id=${post.id})}" id="deletePost">Delete this post</a>
         <a th:href="@{/editPost/{id}(id=${post.id})}">Edit this post</a>
         <p>Authors: <span th:each="par : ${pa}" th:if="${par.id_post == post.id}"><a th:each="author : ${authors}" th:href="@{/authorPage/{id}(id=${author.id})}" th:text="${par.id_author == author.id ? author.username : ''} + ${' '}"/></span></p>
         <a th:href="@{/postPage/{id}(id=${post.id})}" th:text = "${post.post_content}"/>
+        <p>Attachments: <p th:each="attachment : ${attachments}" th:if="${attachment.id_post == post.id}"><a th:text="${attachment.filename}" th:href="@{/files/{filename}(filename=${attachment.filename})}"/></p></p>
         <p th:text="${'Tags: '} + ${post.tags}"/>
+
 
         <form method="POST" th:action="@{/addComment/{id}(id=${post.id})}" th:object="${comment}">
             <div th:if="${#fields.hasErrors() and post.id == postIdForCommentErrors}">
@@ -66,6 +74,7 @@
             <input type="submit" value="Comment"/>
         </form>
 
+
         <p>Comments:</p>
         <div th:each="comment :${comments}" th:if="${post.id == comment.id_post}">
             <a th:href="@{/userPage/{username}(username=${comment.username})}" th:text="${comment.username}"/>
@@ -73,6 +82,7 @@
             <a th:href="@{/editComment/{id}(id=${comment.id})}">Edit this comment</a>
             <a th:href="@{/deleteCommentConfirm/{id}(id=${comment.id})}">Delete this comment</a>
         </div>
+
     </div>
 </body>
 </html>
