@@ -8,6 +8,6 @@ public class TagsValidator implements ConstraintValidator<Tags, String> {
 
     @Override
     public boolean isValid(String tags, ConstraintValidatorContext constraintValidatorContext){
-        return tags.matches("^(\\S+\\s){0,3}\\S+$");
+        return tags.matches("^(\\s*\\S+\\s+){0,3}\\S+\\s*$");
     }
 }

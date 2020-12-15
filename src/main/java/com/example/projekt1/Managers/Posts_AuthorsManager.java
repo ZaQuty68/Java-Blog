@@ -1,17 +1,22 @@
 package com.example.projekt1.Managers;
 
 import com.example.projekt1.Interfaces.Posts_AuthorsInterface;
+import com.example.projekt1.Models.Attachment;
 import com.example.projekt1.Models.Author;
 import com.example.projekt1.Models.Post;
 import com.example.projekt1.Models.Posts_Authors;
+import com.opencsv.CSVWriter;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
+import com.opencsv.bean.StatefulBeanToCsv;
+import com.opencsv.bean.StatefulBeanToCsvBuilder;
+import com.opencsv.exceptions.CsvDataTypeMismatchException;
+import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 import org.springframework.stereotype.Service;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.Reader;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +31,14 @@ public class Posts_AuthorsManager implements Posts_AuthorsInterface {
                 .withType(Posts_Authors.class).withSeparator(',').withIgnoreQuotations(false)
                 .withIgnoreLeadingWhiteSpace(true).build();
         pa = csvReader.parse();
+    }
+
+    @Override
+    public void save() throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException {
+        try(Writer writer = Files.newBufferedWriter(Paths.get("src/main/java/com/example/projekt1/csv/Posts_Authors.csv"));){
+            StatefulBeanToCsv<Posts_Authors> beanToCsv = new StatefulBeanToCsvBuilder(writer).withQuotechar(CSVWriter.NO_QUOTE_CHARACTER).build();
+            beanToCsv.write(pa);
+        }
     }
 
     @Override

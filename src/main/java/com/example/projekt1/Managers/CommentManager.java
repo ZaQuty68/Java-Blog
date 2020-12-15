@@ -3,15 +3,19 @@ package com.example.projekt1.Managers;
 import com.example.projekt1.Interfaces.CommentInterface;
 import com.example.projekt1.Models.Comment;
 import com.example.projekt1.Models.Post;
+import com.opencsv.CSVWriter;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
+import com.opencsv.bean.StatefulBeanToCsv;
+import com.opencsv.bean.StatefulBeanToCsvBuilder;
+import com.opencsv.exceptions.CsvDataTypeMismatchException;
+import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 import javafx.css.Match;
 import org.springframework.stereotype.Service;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.Reader;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -28,6 +32,14 @@ public class CommentManager implements CommentInterface {
                 .withType(Comment.class).withSeparator(',').withIgnoreQuotations(false)
                 .withIgnoreLeadingWhiteSpace(true).build();
         comments = csvReader.parse();
+    }
+
+    @Override
+    public void save() throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException {
+        try(Writer writer = Files.newBufferedWriter(Paths.get("src/main/java/com/example/projekt1/csv/Comments2.csv"));){
+            StatefulBeanToCsv<Comment> beanToCsv = new StatefulBeanToCsvBuilder(writer).withQuotechar(CSVWriter.DEFAULT_QUOTE_CHARACTER).build();
+            beanToCsv.write(comments);
+        }
     }
 
     @Override

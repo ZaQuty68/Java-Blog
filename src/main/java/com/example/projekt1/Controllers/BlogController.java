@@ -5,6 +5,8 @@ import com.example.projekt1.Models.Attachment;
 import com.example.projekt1.Models.Comment;
 import com.example.projekt1.Models.Post;
 import com.example.projekt1.Models.Posts_Authors;
+import com.opencsv.exceptions.CsvDataTypeMismatchException;
+import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,7 +66,7 @@ public class BlogController {
         return "addPost";
     }
     @PostMapping("/addPost")
-    public String processAddingPost(@Valid Post post, Errors errors, int[] id, Model model, @RequestParam("file") MultipartFile file){
+    public String processAddingPost(@Valid Post post, Errors errors, int[] id, Model model, @RequestParam("file") MultipartFile file) throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException {
         if(errors.hasErrors()){
             model.addAttribute("authors", aum.getAllAuthors());
             return "addPost";
@@ -86,11 +89,14 @@ public class BlogController {
                 pam.addP_A(par);
             }
         }
+        atm.save();
+        pam.save();
+        pm.save();
         return "redirect:/";
     }
 
     @PostMapping("/addComment/{id}")
-    public String addComment(@Valid Comment comment, Errors errors, Model model, @PathVariable int id){
+    public String addComment(@Valid Comment comment, Errors errors, Model model, @PathVariable int id) throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException{
         if(!pm.checkPost(id)){
             return "redirect:/error/This post does not exist!";
         }
@@ -107,6 +113,7 @@ public class BlogController {
         comment.setId(cid);
         comment.setId_post(id);
         cm.addComment(comment);
+        cm.save();
         return "redirect:/";
     }
 
@@ -124,7 +131,7 @@ public class BlogController {
         return "deletePostConfirm";
     }
     @RequestMapping(value = "/deletePost/{id}", method = RequestMethod.GET)
-    public String deletePost(@PathVariable int id){
+    public String deletePost(@PathVariable int id) throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException{
         if(!pm.checkPost(id)){
             return "redirect:/error/This post does not exist!";
         }
@@ -132,6 +139,10 @@ public class BlogController {
         pam.deleteByPostId(id);
         cm.deleteCommentsByPostId(id);
         atm.deleteAttachments(id);
+        pm.save();
+        pam.save();
+        cm.save();
+        atm.save();
         return "redirect:/";
     }
 
@@ -149,11 +160,12 @@ public class BlogController {
         return "deleteCommentConfirm";
     }
     @GetMapping("/deleteComment/{id}")
-    public String deleteComment(Model model, @PathVariable int id){
+    public String deleteComment(Model model, @PathVariable int id) throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException{
         if(!cm.checkComment(id)){
             return "redirect:/error/This comment does not exist!";
         }
         cm.deleteComment(id);
+        cm.save();
         return "redirect:/";
     }
 
@@ -171,7 +183,7 @@ public class BlogController {
         return "editPost";
     }
     @PostMapping("/editPost/{id}")
-    public String processEditPost(@Valid Post post, Errors errors, int[] idA, Model model, @PathVariable int id){
+    public String processEditPost(@Valid Post post, Errors errors, int[] idA, Model model, @PathVariable int id) throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException{
         if(!pm.checkPost(id)){
             return "redirect:/error/This post does not exist!";
         }
@@ -179,6 +191,7 @@ public class BlogController {
             model.addAttribute("pa", pam.getAllPostsAuthors());
             model.addAttribute("authors", aum.getAllAuthors());
             model.addAttribute("comments", cm.getAllComments());
+            model.addAttribute("attachments", atm.getAllAttachments());
             return "editPost";
         }
         Post postToEdit = pm.getPostById(id);
@@ -193,6 +206,9 @@ public class BlogController {
                 pam.addP_A(par);
             }
         }
+        pm.save();
+        pam.save();
+        atm.save();
         return "redirect:/";
     }
 
@@ -210,7 +226,7 @@ public class BlogController {
         return "editComment";
     }
     @PostMapping("/editComment/{id}")
-    public String processEditComment(@Valid Comment comment, Errors errors, Model model, @PathVariable int id){
+    public String processEditComment(@Valid Comment comment, Errors errors, Model model, @PathVariable int id) throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException{
         if(!cm.checkComment(id)){
             return "redirect:/error/This comment does not exist!";
         }
@@ -225,6 +241,7 @@ public class BlogController {
         Comment commentToEdit = cm.getCommentById(id);
         commentToEdit.setComment_content(comment.getComment_content());
         commentToEdit.setUsername(comment.getUsername());
+        cm.save();
         return "redirect:/";
     }
 
@@ -331,7 +348,7 @@ public class BlogController {
     }
 
     @PostMapping("/addAttachment/{id}")
-    public String addAttachment(@PathVariable int id, @RequestParam("file") MultipartFile file){
+    public String addAttachment(@PathVariable int id, @RequestParam("file") MultipartFile file) throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException{
         if(!pm.checkPost(id)){
             return "redirect:/error/This post does not exist!";
         }
@@ -342,17 +359,19 @@ public class BlogController {
             attachment.setId_post(id);
             atm.addAttachment(attachment);
         }
+        atm.save();
         return "redirect:/editPost/" + id;
     }
 
     @GetMapping("/deleteAttachment/{id}/{filename}")
-    public String deleteAttachment(@PathVariable int id, @PathVariable String filename){
+    public String deleteAttachment(@PathVariable int id, @PathVariable String filename) throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException{
         if(!pm.checkPost(id)){
             return "redirect:/error/This post does not exist!";
         }
         if(!filename.isEmpty()){
             atm.deleteAttachment(id, filename);
         }
+        atm.save();
         return "redirect:/editPost/" + id;
     }
 

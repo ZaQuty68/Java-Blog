@@ -1,7 +1,10 @@
 package com.example.projekt1.Interfaces;
 
 import com.example.projekt1.Models.Comment;
+import com.opencsv.exceptions.CsvDataTypeMismatchException;
+import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface CommentInterface {
@@ -25,4 +28,7 @@ public interface CommentInterface {
     List<Comment> getCommentsByPostId(int id);
 
     boolean checkCommentsByPostId(int id);
+
+    void save() throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException;
+
 }

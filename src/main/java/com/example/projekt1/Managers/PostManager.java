@@ -4,15 +4,24 @@ import com.example.projekt1.Interfaces.PostInterface;
 import com.example.projekt1.Models.Author;
 import com.example.projekt1.Models.Post;
 import com.example.projekt1.Models.Posts_Authors;
+import com.opencsv.CSVWriter;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
+import com.opencsv.bean.StatefulBeanToCsv;
+import com.opencsv.bean.StatefulBeanToCsvBuilder;
+import com.opencsv.exceptions.CsvDataTypeMismatchException;
+import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class PostManager implements PostInterface {
@@ -26,6 +35,15 @@ public class PostManager implements PostInterface {
                 .withIgnoreLeadingWhiteSpace(true).build();
         posts = csvReader.parse();
     }
+
+    @Override
+    public void save() throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException {
+        try(Writer writer = Files.newBufferedWriter(Paths.get("src/main/java/com/example/projekt1/csv/Posts.csv"));){
+            StatefulBeanToCsv<Post> beanToCsv = new StatefulBeanToCsvBuilder(writer).withQuotechar(CSVWriter.DEFAULT_QUOTE_CHARACTER).build();
+            beanToCsv.write(posts);
+        }
+    }
+
 
     @Override
     public void addPost(Post post){
