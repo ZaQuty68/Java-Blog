@@ -3,44 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <title>Adding new post</title>
+    <link rel="stylesheet" th:href="@{/styles.css}"/>
 </head>
 <body>
     <h1>Adding new post</h1>
-    <form method="POST" enctype="multipart/form-data" th:action="@{/addPost}" th:object="${post}">
-        <div th:if="${#fields.hasErrors()}">
-            <span class="ValidationError">
-                Please correct following errors:
+    <div class="block">
+        <form method="POST" enctype="multipart/form-data" th:action="@{/addPost}" th:object="${post}">
+            <div th:if="${#fields.hasErrors()}">
+                <span class="error">
+                    Please correct following errors:
+                </span>
+            </div>
+            <label for="id">Authors:</label>
+            <select th:value="${id}" name="id" id="id" multiple="multiple" required="required" class="select">
+                <option th:each="author: ${authors}" th:value="${author.id}" th:text="${author.username}">Username</option>
+            </select>
+            <br/><br/>
+
+            <label for="post_content">Post content:</label>
+            <input type="text" th:field="*{post_content}"/>
+
+            <span class="error"
+                  th:if="${#fields.hasErrors('post_content')}"
+                  th:errors="*{post_content}">Post content Error
             </span>
-        </div>
-        <label for="id">Authors:</label>
-        <select th:value="${id}" name="id" id="id" multiple="multiple" required="required">
-            <option th:each="author: ${authors}" th:value="${author.id}" th:text="${author.username}">Username</option>
-        </select>
+            <br/><br/>
+
+            <label for="file">Attachment to upload:</label>
+            <input type="file" name="file" class="button-invisible"/>
+            <br/><br/>
+
+            <label for="tags">Tags:</label>
+            <input type="text" th:field="*{tags}"/>
+
+            <span class="error"
+                  th:if="${#fields.hasErrors('tags')}"
+                  th:errors="*{tags}">Tags Error
+            </span>
+            <br/><br/>
+            <input type="submit" value="Submit"/>
+        </form>
         <br/>
-
-        <label for="post_content">Post content:</label>
-        <input type="text" th:field="*{post_content}"/>
-
-        <span class="validationError"
-              th:if="${#fields.hasErrors('post_content')}"
-              th:errors="*{post_content}">Post content Error
-        </span>
-        <br/>
-
-        <label for="file">Attachment to upload:</label>
-        <input type="file" name="file"/>
-        <br/>
-
-        <label for="tags">Tags:</label>
-        <input type="text" th:field="*{tags}"/>
-
-        <span class="validationError"
-              th:if="${#fields.hasErrors('tags')}"
-              th:errors="*{tags}">Tags Error
-        </span>
-        <br/>
-        <input type="submit" value="Submit"/>
-    </form>
-    <a th:href="@{'/'}">Cancel</a>
+        <a th:href="@{'/'}" class="button">Cancel</a>
+    </div>
 </body>
 </html>

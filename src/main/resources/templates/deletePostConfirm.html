@@ -3,20 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <title>Delete Post</title>
+    <link rel="stylesheet" th:href="@{/styles.css}" />
 </head>
 <body>
-<h1>Are you sure u want to delete this post?</h1>
-<a th:href="@{'/deletePost/{id}'(id=${post.id})}" id="deletePost">Yes</a>
-<a th:href="@{/}">No</a>
-<div>
-    <p>Authors: <span th:each="par : ${pa}" th:if="${par.id_post == post.id}"><a th:each="author : ${authors}" th:href="@{/authorPage/{id}(id=${author.id})}" th:text="${par.id_author == author.id ? author.username : ''} + ${' '}"/></span></p>
-    <a th:href="@{/postPage/{id}(id=${post.id})}" th:text = "${post.post_content}"/>
-    <p>Attachments: <p th:each="attachment : ${attachments}" th:if="${attachment.id_post == post.id}"><a th:text="${attachment.filename}" th:href="@{/files/{filename}(filename=${attachment.filename})}"/></p></p>
-    <p th:text="${'Tags: '} + ${post.tags}"/>
-    <div th:each="comment :${comments}" th:if="${post.id == comment.id_post}">
-        <a th:href="@{/userPage/{username}(username=${comment.username})}" th:text="${comment.username}"/>
-        <p th:text="${comment.comment_content}"/>
+    <h1>Are you sure u want to delete this post?</h1>
+    <div class="block">
+        <a th:href="@{'/deletePost/{id}'(id=${post.id})}" id="deletePost" class="button">Yes</a>
+        <a th:href="@{/}" class="button">No</a>
+        <br/>
+        <p class="authors">Authors: <span th:each="par : ${pa}" th:if="${par.id_post == post.id}"><a th:each="author : ${authors}" th:href="@{/authorPage/{id}(id=${author.id})}" th:if="${par.id_author == author.id}" th:text="${author.username}" class="button-invisible"/></span></p>
+        <p class="post"><a th:href="@{/postPage/{id}(id=${post.id})}" th:text = "${post.post_content}" class="button-invisible"/></p>
+        <p class="attachments">Attachments: <span th:each="attachment : ${attachments}" th:if="${attachment.id_post == post.id}"><a th:text="${attachment.filename}" th:href="@{/files/{filename}(filename=${attachment.filename})}" class="button-invisible"/></span></p>
+        <p th:text="${'Tags: '} + ${post.tags}" class="tags"/>
+        <div class="comments">
+            <div th:each="comment :${comments}" th:if="${post.id == comment.id_post}">
+                <div class="comment">
+                    <a th:href="@{/userPage/{username}(username=${comment.username})}" th:text="${comment.username}" class="button-invisible"/>
+                    <p th:text="${comment.comment_content}"/>
+                </div>
+                <br/>
+            </div>
+        </div>
     </div>
-</div>
 </body>
 </html>

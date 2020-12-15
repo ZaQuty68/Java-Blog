@@ -3,63 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <title>Editing post</title>
+    <link rel="stylesheet" th:href="@{/styles.css}" />
 </head>
 <body>
-<h1>Editing post</h1>
-<p>Actual authors: <span th:each="par : ${pa}" th:if="${par.id_post == post.id}"><a th:each="author : ${authors}" th:href="@{/authorPage/{id}(id=${author.id})}" th:text="${par.id_author == author.id ? author.username : ''} + ${' '}"/></span></p>
-<form method="POST" th:action="@{/editPost/{id}(id=${post.id})}" th:object="${post}">
-    <div th:if="${#fields.hasErrors()}">
-            <span class="ValidationError">
-                Please correct following errors:
+    <h1>Editing post</h1>
+    <div class="block">
+        <p class="authors">Actual authors: <span th:each="par : ${pa}" th:if="${par.id_post == post.id}"><a th:each="author : ${authors}" th:href="@{/authorPage/{id}(id=${author.id})}" th:if="${par.id_author == author.id}" th:text="${author.username}" class="button-invisible"/></span></p>
+        <form method="POST" th:action="@{/editPost/{id}(id=${post.id})}" th:object="${post}">
+            <div th:if="${#fields.hasErrors()}">
+                   <span class="error">
+                      Please correct following errors:
+                   </span>
+            </div>
+            <label for="idA">Authors:</label>
+            <select th:value="${idA}" name="idA" id="idA" multiple="multiple" required="required" class="select">
+               <option th:each="author: ${authors}" th:value="${author.id}" th:text="${author.username}">Username</option>
+            </select>
+            <br/><br/>
+
+            <label for="post_content">Post content:</label>
+            <input type="text" th:field="*{post_content}"/>
+
+            <span class="error"
+                th:if="${#fields.hasErrors('post_content')}"
+               th:errors="*{post_content}">Post content Error
             </span>
+            <br/><br/>
+
+            <label for="tags">Tags:</label>
+            <input type="text" th:field="*{tags}"/>
+
+            <span class="error"
+                 th:if="${#fields.hasErrors('tags')}"
+                th:errors="*{tags}">Tags Error
+               </span>
+            <br/><br/>
+            <input type="submit" value="Submit"/>
+            <br/><br/>
+        </form>
+        <div class="attachments">
+           <p>Attachments: </p>
+           <table>
+               <tr th:each="attachment : ${attachments}" th:if="${attachment.id_post == post.id}">
+                   <td><a th:text="${attachment.filename}" th:href="@{/files/{filename}(filename=${attachment.filename})}" class="button-invisible"/></td>
+                   <td><a th:href="@{/deleteAttachment/{id}/{filename}(id=${post.id}, filename=${attachment.filename})}" class="button-red">Delete this attachment</a></td>
+               </tr>
+           </table>
+        </div>
+        <br/>
+        <form method="POST" enctype="multipart/form-data" th:action="@{/addAttachment/{id}(id=${post.id})}">
+            <label for="file">Attachment to upload:</label>
+            <input type="file" name="file" class="button-invisible"/>
+            <input type="submit" value="Upload" />
+        </form>
+
+        <br/>
+        <a th:href="@{'/'}" class="button">Cancel</a>
+        <br/><br/>
+        <div class="comments">
+            <p>Comments:</p>
+            <div th:each="comment :${comments}" th:if="${post.id == comment.id_post}">
+                <div class="comment">
+                    <a th:href="@{/userPage/{username}(username=${comment.username})}" th:text="${comment.username}" class="button-invisible"/>
+                    <p th:text="${comment.comment_content}"/>
+                </div>
+                <br/>
+            </div>
+        </div>
     </div>
-    <label for="idA">Authors:</label>
-    <select th:value="${idA}" name="idA" id="idA" multiple="multiple" required="required">
-        <option th:each="author: ${authors}" th:value="${author.id}" th:text="${author.username}">Username</option>
-    </select>
-    <br/>
-
-    <label for="post_content">Post content:</label>
-    <input type="text" th:field="*{post_content}"/>
-
-    <span class="validationError"
-          th:if="${#fields.hasErrors('post_content')}"
-          th:errors="*{post_content}">Post content Error
-        </span>
-    <br/>
-
-    <label for="tags">Tags:</label>
-    <input type="text" th:field="*{tags}"/>
-
-    <span class="validationError"
-          th:if="${#fields.hasErrors('tags')}"
-          th:errors="*{tags}">Tags Error
-        </span>
-    <br/>
-    <input type="submit" value="Submit"/>
-</form>
-<div >
-    <p>Attachments: </p>
-    <table>
-        <tr th:each="attachment : ${attachments}" th:if="${attachment.id_post == post.id}">
-            <td><a th:text="${attachment.filename}" th:href="@{/files/{filename}(filename=${attachment.filename})}"/></td>
-            <td><a th:href="@{/deleteAttachment/{id}/{filename}(id=${post.id}, filename=${attachment.filename})}">Delete this attachment</a></td>
-        </tr>
-    </table>
-</div>
-<form method="POST" enctype="multipart/form-data" th:action="@{/addAttachment/{id}(id=${post.id})}">
-    <table>
-        <tr><td>Attachment to upload:</td><td><input type="file" name="file" /></td></tr>
-        <tr><td></td><td><input type="submit" value="Upload" /></td></tr>
-    </table>
-</form>
-
-<br/>
-<a th:href="@{'/'}">Cancel</a>
-<p>Comments:</p>
-<div th:each="comment :${comments}" th:if="${post.id == comment.id_post}">
-    <a th:href="@{/userPage/{username}(username=${comment.username})}" th:text="${comment.username}"/>
-    <p th:text="${comment.comment_content}"/>
-</div>
 </body>
 </html>

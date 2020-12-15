@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Welcome!</title>
+    <link rel="stylesheet" th:href="@{/styles.css}" />
 </head>
 <body>
     <h1>Welcome to my blog!</h1>
@@ -10,79 +11,81 @@
 
     <div>
         <form method="POST" th:action="@{/searchPost}">
-            <label for="type">Search for posts by:</label>
-            <select th:value="${type}" name="type" id="type" required="required">
+            <input type="text" name="pattern" id="pattern" />
+            <input type="submit" value="Search"/>
+            <label for="type"> for posts by:</label>
+            <select th:value="${type}" name="type" id="type" required="required" class="select">
                 <option th:value="content" th:text="${'Post content'}"/>
                 <option th:value="author" th:text="${'Author'}"/>
                 <option th:value="tags" th:text="${'Tag'}"/>
             </select>
-            <br/>
-
-            <input type="text" name="pattern" id="pattern"/>
-            <br/>
-
-            <input type="submit" value="Search"/>
-        </form>
-    </div>
-
-
-    <div>
-        <form method="POST" th:action="@{/searchUser}">
-            <label for="username">Search for user: </label>
-            <input type="text" name="username" id="username"
-                pattern="[a-zA-Z0-9]+" title="Must contain only numbers and letters!"/>
-            <br/>
-
-            <input type="submit" value="Search"/>
         </form>
     </div>
     <br/>
-    <a th:href="@{/addPost}">Add new post</a>
+
+    <div>
+        <form method="POST" th:action="@{/searchUser}">
+            <input type="submit" value="Search"/>
+            <label for="username"> for user: </label>
+            <input type="text" name="username" id="username"
+                pattern="[a-zA-Z0-9]+" title="Must contain only numbers and letters!"/>
+        </form>
+    </div>
+
+    <br/>
+    <a th:href="@{/addPost}" class="button">Add new post</a>
 
 
     <h2>Here are all the posts:</h2>
     <div th:each="post : ${posts}">
-        <a th:href="@{/deletePostConfirm/{id}(id=${post.id})}" id="deletePost">Delete this post</a>
-        <a th:href="@{/editPost/{id}(id=${post.id})}">Edit this post</a>
-        <p>Authors: <span th:each="par : ${pa}" th:if="${par.id_post == post.id}"><a th:each="author : ${authors}" th:href="@{/authorPage/{id}(id=${author.id})}" th:text="${par.id_author == author.id ? author.username : ''} + ${' '}"/></span></p>
-        <a th:href="@{/postPage/{id}(id=${post.id})}" th:text = "${post.post_content}"/>
-        <p>Attachments: <p th:each="attachment : ${attachments}" th:if="${attachment.id_post == post.id}"><a th:text="${attachment.filename}" th:href="@{/files/{filename}(filename=${attachment.filename})}"/></p></p>
-        <p th:text="${'Tags: '} + ${post.tags}"/>
+        <div class="block">
+            <a th:href="@{/editPost/{id}(id=${post.id})}" class="button-red">Edit this post</a>
+            <a th:href="@{/deletePostConfirm/{id}(id=${post.id})}" id="deletePost" class="button-red">Delete this post</a>
+            <p class="authors">Authors: <span th:each="par : ${pa}" th:if="${par.id_post == post.id}"><a th:each="author : ${authors}" th:href="@{/authorPage/{id}(id=${author.id})}" th:if="${par.id_author == author.id}" th:text="${author.username}" class="button-invisible"/></span></p>
+            <p class="post"><a th:href="@{/postPage/{id}(id=${post.id})}" th:text = "${post.post_content}" class="button-invisible"/></p>
+            <p class="attachments">Attachments: <span th:each="attachment : ${attachments}" th:if="${attachment.id_post == post.id}"><a th:text="${attachment.filename}" th:href="@{/files/{filename}(filename=${attachment.filename})}" class="button-invisible"/></span></p>
+            <p th:text="${'Tags: '} + ${post.tags}" class="tags"/>
 
 
-        <form method="POST" th:action="@{/addComment/{id}(id=${post.id})}" th:object="${comment}">
-            <div th:if="${#fields.hasErrors() and post.id == postIdForCommentErrors}">
-                <span class="ValidationError">
-                    Please correct following errors:
+            <form method="POST" th:action="@{/addComment/{id}(id=${post.id})}" th:object="${comment}">
+                <div th:if="${#fields.hasErrors() and post.id == postIdForCommentErrors}">
+                    <span class="error">
+                        Please correct following errors:
+                    </span>
+                </div>
+
+                <label for="username">Username: </label>
+                <input type="text" th:field="*{username}"/>
+                <span th:if="${#fields.hasErrors('username') and post.id == postIdForCommentErrors}"
+                      th:errors="*{username}" class="error">Username Error
                 </span>
+                <br/>
+                <br/>
+
+                <label for="comment_content">Comment content: </label>
+                <input type="text" th:field="*{comment_content}"/>
+                <span th:if="${#fields.hasErrors('comment_content') and post.id == postIdForCommentErrors}"
+                      th:errors="*{comment_content}" class="error">Comment content Error
+                </span>
+                <input type="submit" value="Comment"/>
+            </form>
+            <br/>
+
+
+            <div class="comments">
+                <p>Comments:</p>
+                <div th:each="comment :${comments}" th:if="${post.id == comment.id_post}">
+                    <div class="comment">
+                        <a th:href="@{/userPage/{username}(username=${comment.username})}" th:text="${comment.username}" class="button-invisible"/>
+                        <p th:text="${comment.comment_content}"/>
+                        <a th:href="@{/editComment/{id}(id=${comment.id})}" class="button-red">Edit this comment</a>
+                        <a th:href="@{/deleteCommentConfirm/{id}(id=${comment.id})}" class="button-red">Delete this comment</a>
+                    </div>
+                    <br/>
+                </div>
             </div>
-
-            <label for="username">Username: </label>
-            <input type="text" th:field="*{username}"/>
-            <span th:if="${#fields.hasErrors('username') and post.id == postIdForCommentErrors}"
-                  th:errors="*{username}">Username Error
-            </span>
-            <br/>
-
-            <label for="comment_content">Comment content: </label>
-            <input type="text" th:field="*{comment_content}"/>
-            <span th:if="${#fields.hasErrors('comment_content') and post.id == postIdForCommentErrors}"
-                  th:errors="*{comment_content}">Comment content Error
-            </span>
-            <br/>
-
-            <input type="submit" value="Comment"/>
-        </form>
-
-
-        <p>Comments:</p>
-        <div th:each="comment :${comments}" th:if="${post.id == comment.id_post}">
-            <a th:href="@{/userPage/{username}(username=${comment.username})}" th:text="${comment.username}"/>
-            <p th:text="${comment.comment_content}"/>
-            <a th:href="@{/editComment/{id}(id=${comment.id})}">Edit this comment</a>
-            <a th:href="@{/deleteCommentConfirm/{id}(id=${comment.id})}">Delete this comment</a>
         </div>
-
+        <br/>
     </div>
 </body>
 </html>

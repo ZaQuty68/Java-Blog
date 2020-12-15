@@ -3,44 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <title>Editing comment</title>
+    <link rel="stylesheet" th:href="@{/styles.css}" />
 </head>
 <body>
-<h1>Editing comment</h1>
-<p>Authors: <span th:each="par : ${pa}" th:if="${par.id_post == post.id}"><a th:each="author : ${authors}" th:href="@{/authorPage/{id}(id=${author.id})}" th:text="${par.id_author == author.id ? author.username : ''} + ${' '}"/></span></p>
-<a th:href="@{/postPage/{id}(id=${post.id})}" th:text = "${post.post_content}"/>
-<p>Attachments: <p th:each="attachment : ${attachments}" th:if="${attachment.id_post == post.id}"><a th:text="${attachment.filename}" th:href="@{/files/{filename}(filename=${attachment.filename})}"/></p></p>
-<p th:text="${'Tags: '} + ${post.tags}"/>
-<form method="POST" th:action="@{/editComment/{id}(id=${comment.id})}" th:object="${comment}">
-    <div th:if="${#fields.hasErrors()}">
-            <span class="ValidationError">
-                Please correct following errors:
-            </span>
+    <h1>Editing comment</h1>
+    <div class="block">
+        <p class="authors">Authors: <span th:each="par : ${pa}" th:if="${par.id_post == post.id}"><a th:each="author : ${authors}" th:href="@{/authorPage/{id}(id=${author.id})}" th:if="${par.id_author == author.id}" th:text="${author.username}" class="button-invisible"/></span></p>
+        <p class="post"><a th:href="@{/postPage/{id}(id=${post.id})}" th:text = "${post.post_content}" class="button-invisible"/></p>
+        <p class="attachments">Attachments: <span th:each="attachment : ${attachments}" th:if="${attachment.id_post == post.id}"><a th:text="${attachment.filename}" th:href="@{/files/{filename}(filename=${attachment.filename})}" class="button-invisible"/></span></p>
+        <p th:text="${'Tags: '} + ${post.tags}" class="tags"/>
+        <form method="POST" th:action="@{/editComment/{id}(id=${comment.id})}" th:object="${comment}">
+           <div th:if="${#fields.hasErrors()}">
+                   <span class="error">
+                       Please correct following errors:
+                   </span>
+           </div>
+
+            <label for="username">Username: </label>
+            <input type="text" th:field="*{username}"/>
+
+           <span class="error"
+                 th:if="${#fields.hasErrors('username')}"
+                 th:errors="*{username}">Username Error
+               </span>
+           <br/><br/>
+
+           <label for="comment_content">Comment content: </label>
+           <input type="text" th:field="*{comment_content}"/>
+
+           <span class="error"
+                 th:if="${#fields.hasErrors('comment_content')}"
+                 th:errors="*{comment_content}">Comment content Error
+               </span>
+           <input type="submit" value="Submit"/>
+        </form>
+        <br/>
+        <a th:href="@{'/'}" class="button">Cancel</a>
+        <br/><br/>
+        <div class="comments">
+            <p>Comments:</p>
+            <div th:each="comment :${comments}" th:if="${post.id == comment.id_post}">
+                <div class="comment">
+                    <a th:href="@{/userPage/{username}(username=${comment.username})}" th:text="${comment.username}" class="button-invisible"/>
+                    <p th:text="${comment.comment_content}"/>
+                </div>
+                <br/>
+            </div>
+        </div>
     </div>
-
-    <label for="username">Username: </label>
-    <input type="text" th:field="*{username}"/>
-
-    <span class="validationError"
-          th:if="${#fields.hasErrors('username')}"
-          th:errors="*{username}">Username Error
-        </span>
-    <br/>
-
-    <label for="comment_content">Comment content: </label>
-    <input type="text" th:field="*{comment_content}"/>
-
-    <span class="validationError"
-          th:if="${#fields.hasErrors('comment_content')}"
-          th:errors="*{comment_content}">Comment content Error
-        </span>
-    <br/>
-    <input type="submit" value="Submit"/>
-</form>
-<a th:href="@{'/'}">Cancel</a>
-<p>Comments:</p>
-<div th:each="comment :${comments}" th:if="${post.id == comment.id_post}">
-    <a th:href="@{/userPage/{username}(username=${comment.username})}" th:text="${comment.username}"/>
-    <p th:text="${comment.comment_content}"/>
-</div>
 </body>
 </html>

@@ -3,11 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <title>User search</title>
+    <link rel="stylesheet" th:href="@{/styles.css}" />
 </head>
 <body>
-<h1 th:text="${i == 1 ? 'Found 1 match!' : 'Found ' + i + ' matches:'}"/>
-<span th:each="comment :${comments}"><a th:text="${comment.username}" th:href="@{/userPage/{username}(username=${comment.username})}"/> </span>
-<br/>
-<a th:href="@{/}">Cancel</a>
+    <h1 th:text="${i == 1 ? 'Found 1 match!' : 'Found ' + i + ' matches:'}"/>
+    <div class="block">
+        <div class="authors">
+            <span th:each="comment :${comments}"><a th:text="${comment.username}" th:href="@{/userPage/{username}(username=${comment.username})}" class="button-invisible"/> </span>
+        </div>
+        <br/>
+        <a th:href="@{/}" class="button">Cancel</a>
+    </div>
 </body>
 </html>

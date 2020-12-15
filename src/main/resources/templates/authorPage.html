@@ -3,23 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <title>Author Page</title>
+    <link rel="stylesheet" th:href="@{/styles.css}" />
 </head>
 <body>
-<h1 th:text="${'Author: ' + author.username}"/>
-<h2  th:text="${author.first_name + ' ' + author.last_name}"/>
-<a th:href="@{/}">Go back to main page</a>
-<p th:text="${i == 1 ? 'This author has posted 1 post:' : 'This author has posted ' + i + ' posts:'}"/>
-<div th:each="post : ${posts}">
-    <p>Other authors: <span th:each="par: ${pa}" th:if="${par.id_post == post.id}"><a th:each="author2 : ${authors}" th:href="@{/authorPage/{id}(id=${author2.id})}" th:text="${par.id_author == author2.id and author2.id != author.id ? author2.username : ''} + ${' '}"/></span></p>
-    <a th:href="@{/postPage/{id}(id=${post.id})}" th:text = "${post.post_content}"/>
-    <p>Attachments: <p th:each="attachment : ${attachments}" th:if="${attachment.id_post == post.id}"><a th:text="${attachment.filename}" th:href="@{/files/{filename}(filename=${attachment.filename})}"/></p></p>
-    <p th:text="${'Tags: '} + ${post.tags}"/>
-    <p>Comments:</p>
-    <div th:each="comment :${comments}" th:if="${post.id == comment.id_post}">
-        <a th:href="@{/userPage/{username}(username=${comment.username})}" th:text="${comment.username}"/>
-        <p th:text="${comment.comment_content}"/>
+    <h1 th:text="${'Author: ' + author.username}"/>
+    <h2  th:text="${author.first_name + ' ' + author.last_name}"/>
+
+    <a th:href="@{/}" class="button">Go back to main page</a>
+    <h3 th:text="${i == 1 ? 'This author has posted 1 post:' : 'This author has posted ' + i + ' posts:'}"/>
+
+    <div th:each="post : ${posts}">
+        <div class="block">
+            <p class="authors">Other authors: <span th:each="par: ${pa}" th:if="${par.id_post == post.id}"><a th:each="author2 : ${authors}" th:href="@{/authorPage/{id}(id=${author2.id})}" th:if="${par.id_author == author2.id and author2.id != author.id}" th:text="${author2.username}" class="button-invisible"/></span></p>
+            <p class="post"><a th:href="@{/postPage/{id}(id=${post.id})}" th:text = "${post.post_content}" class="button-invisible"/></p>
+            <p class="attachments">Attachments: <span th:each="attachment : ${attachments}" th:if="${attachment.id_post == post.id}"><a th:text="${attachment.filename}" th:href="@{/files/{filename}(filename=${attachment.filename})}" class="button-invisible"/></span></p>
+            <p th:text="${'Tags: '} + ${post.tags}" class="tags"/>
+            <div class="comments">
+                <p>Comments:</p>
+                <div th:each="comment :${comments}" th:if="${post.id == comment.id_post}">
+                    <div class="comment">
+                       <a th:href="@{/userPage/{username}(username=${comment.username})}" th:text="${comment.username}" class="button-invisible"/>
+                       <p th:text="${comment.comment_content}"/>
+                    </div>
+                    <br/>
+                </div>
+            </div>
+        </div>
+        <br/>
     </div>
-</div>
 
 </body>
 </html>

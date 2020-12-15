@@ -3,15 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <title>User Page</title>
+    <link rel="stylesheet" th:href="@{/styles.css}" />
 </head>
 <body>
-<h1 th:text="${'User: ' + username}"/>
-<a th:href="@{/}">Go back to main page</a>
-<p th:text="${i == 1 ? 'This user has posted 1 comment.' : 'This user has posted ' + i + ' comments.'}"/>
-<p>User comments: </p>
-<div th:each="comment : ${comments}">
-    <p th:text="${comment.comment_content}"/>
-    <a th:href="@{/postPage/{id}(id=${comment.id_post})}">Commented on this post</a>
-</div>
+    <h1 th:text="${'User: ' + username}"/>
+    <div class="block">
+        <a th:href="@{/}" class="button">Go back to main page</a>
+        <h3 th:text="${i == 1 ? 'This user has posted 1 comment:' : 'This user has posted ' + i + ' comments:'}"/>
+        <div class="comments">
+            <p>User comments: </p>
+            <div th:each="comment : ${comments}">
+                <div class="comment">
+                    <p th:text="${comment.comment_content}"/>
+                    <a th:href="@{/postPage/{id}(id=${comment.id_post})}" class="button">Commented on this post</a>
+                </div>
+                <br/>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

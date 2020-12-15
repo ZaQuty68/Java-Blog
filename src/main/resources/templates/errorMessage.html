@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <title>Error message</title>
+    <link rel="stylesheet" th:href="@{/styles.css}" />
 </head>
 <body>
-<h1>Error message:</h1>
-<h2 th:text="${message}"/>
-<a th:href="@{'/'}">Go back to main page</a>
+    <h1 class="error-message">Error message:</h1>
+    <h2 th:text="${message}" class="error-message"/>
+    <p class="p-error"><a th:href="@{'/'}" class="button-error">Go back to main page</a></p>
 
 </body>
 </html>
