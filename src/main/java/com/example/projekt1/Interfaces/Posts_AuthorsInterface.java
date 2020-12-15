@@ -16,15 +16,9 @@ public interface Posts_AuthorsInterface {
 
     void deleteByPostId(int id);
 
-    List<Posts_Authors> getByPostId(int id);
-
     List<Posts_Authors> getByAuthors(List<Author> authors);
 
     List<Posts_Authors> getByAuthor(Author author);
-
-    boolean checkForAuthor(int id);
-
-    boolean checkForPost(int id);
 
     void save() throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException;
 

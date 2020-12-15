@@ -2,7 +2,6 @@ package com.example.projekt1.Managers;
 
 import com.example.projekt1.Interfaces.AttachmentInterface;
 import com.example.projekt1.Models.Attachment;
-import com.example.projekt1.Models.Post;
 import com.opencsv.CSVWriter;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
@@ -48,17 +47,6 @@ public class AttachmentManager implements AttachmentInterface {
     public List<Attachment> getAllAttachments(){ return attachments; }
 
     @Override
-    public List<Attachment> getAttachmentsById(int id){
-        List<Attachment> attachmentsToReturn = new ArrayList<>();
-        for (Attachment attachment: attachments){
-            if (attachment.getId_post() == id){
-                attachmentsToReturn.add(attachment);
-            }
-        }
-        return attachmentsToReturn;
-    }
-
-    @Override
     public void deleteAttachments(int id){
         List<Attachment> attachmentsToDelete = new ArrayList<>();
         for (Attachment attachment: attachments){
@@ -88,16 +76,5 @@ public class AttachmentManager implements AttachmentInterface {
                 attachments.remove(attachment);
             }
         }
-    }
-
-
-    @Override
-    public boolean checkAttachment(int id){
-        for(Attachment attachment: attachments){
-            if(attachment.getId_post() == id){
-                return true;
-            }
-        }
-        return false;
     }
 }

@@ -1,7 +1,6 @@
 package com.example.projekt1.Managers;
 
 import com.example.projekt1.Interfaces.PostInterface;
-import com.example.projekt1.Models.Author;
 import com.example.projekt1.Models.Post;
 import com.example.projekt1.Models.Posts_Authors;
 import com.opencsv.CSVWriter;
@@ -20,8 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 public class PostManager implements PostInterface {

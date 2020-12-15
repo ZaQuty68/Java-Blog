@@ -2,7 +2,6 @@ package com.example.projekt1.Managers;
 
 import com.example.projekt1.Interfaces.CommentInterface;
 import com.example.projekt1.Models.Comment;
-import com.example.projekt1.Models.Post;
 import com.opencsv.CSVWriter;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
@@ -10,7 +9,6 @@ import com.opencsv.bean.StatefulBeanToCsv;
 import com.opencsv.bean.StatefulBeanToCsvBuilder;
 import com.opencsv.exceptions.CsvDataTypeMismatchException;
 import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
-import javafx.css.Match;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -128,26 +126,5 @@ public class CommentManager implements CommentInterface {
             }
         }
         return flag;
-    }
-
-    @Override
-    public List<Comment> getCommentsByPostId(int id){
-        List<Comment> commentsToReturn = new ArrayList<>();
-        for(Comment comment: comments){
-            if(comment.getId_post() == id){
-                commentsToReturn.add(comment);
-            }
-        }
-        return commentsToReturn;
-    }
-
-    @Override
-    public boolean checkCommentsByPostId(int id){
-        for(Comment comment: comments){
-            if(comment.getId_post() == id){
-                return true;
-            }
-        }
-        return false;
     }
 }

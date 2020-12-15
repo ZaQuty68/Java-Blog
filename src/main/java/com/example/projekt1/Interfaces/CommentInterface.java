@@ -25,10 +25,6 @@ public interface CommentInterface {
 
     boolean checkCommentsByUsername(String username);
 
-    List<Comment> getCommentsByPostId(int id);
-
-    boolean checkCommentsByPostId(int id);
-
     void save() throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException;
 
 }

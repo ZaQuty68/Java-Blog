@@ -13,13 +13,9 @@ public interface AttachmentInterface {
 
     List<Attachment> getAllAttachments();
 
-    List<Attachment> getAttachmentsById(int id);
-
     void deleteAttachments(int id);
 
     void deleteAttachment(int id, String filename);
-
-    boolean checkAttachment(int id);
 
     void save() throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException;
 }

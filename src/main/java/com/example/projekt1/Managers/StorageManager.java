@@ -1,16 +1,11 @@
 package com.example.projekt1.Managers;
 
-import com.example.projekt1.Config.StorageProperties;
 import com.example.projekt1.Exceptions.StorageException;
 import com.example.projekt1.Exceptions.StorageFileNotFoundException;
 import com.example.projekt1.Interfaces.StorageInterface;
-import org.apache.catalina.StoreManager;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.mongo.embedded.EmbeddedMongoProperties;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
-import org.springframework.util.FileSystemUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -20,7 +15,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.stream.Stream;
 
 @Service
 public class StorageManager implements StorageInterface {
@@ -47,16 +41,6 @@ public class StorageManager implements StorageInterface {
     }
 
     @Override
-    public Stream<Path> loadAll(){
-        try{
-            return Files.walk(this.rootLocation, 1).filter(path -> !path.equals(this.rootLocation)).map(this.rootLocation::relativize);
-        }
-        catch (IOException e){
-            throw new StorageException("Failed to read stored files", e);
-        }
-    }
-
-    @Override
     public Path load(String filename) { return rootLocation.resolve(filename); }
 
     @Override
@@ -73,21 +57,6 @@ public class StorageManager implements StorageInterface {
         }
         catch (MalformedURLException e){
             throw new StorageFileNotFoundException("Could not read file: " + filename, e);
-        }
-    }
-
-    @Override
-    public void deleteAll() {
-        FileSystemUtils.deleteRecursively(rootLocation.toFile());
-    }
-
-    @Override
-    public void init(){
-        try{
-            Files.createDirectories(rootLocation);
-        }
-        catch (IOException e) {
-            throw  new StorageException("Could not initialize storage", e);
         }
     }
 }

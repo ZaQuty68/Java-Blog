@@ -1,6 +1,5 @@
 package com.example.projekt1.Interfaces;
 
-import com.example.projekt1.Models.Author;
 import com.example.projekt1.Models.Post;
 import com.example.projekt1.Models.Posts_Authors;
 import com.opencsv.exceptions.CsvDataTypeMismatchException;

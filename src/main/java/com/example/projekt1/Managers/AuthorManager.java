@@ -1,10 +1,7 @@
 package com.example.projekt1.Managers;
 
 import com.example.projekt1.Interfaces.AuthorIterface;
-import com.example.projekt1.Models.Attachment;
 import com.example.projekt1.Models.Author;
-import com.example.projekt1.Models.Post;
-import com.example.projekt1.Models.Posts_Authors;
 import com.opencsv.CSVWriter;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
@@ -44,11 +41,6 @@ public class AuthorManager implements AuthorIterface {
     }
 
     @Override
-    public void addAuthor(Author author){
-        authors.add(author);
-    }
-
-    @Override
     public List<Author> getAllAuthors() { return authors; }
 
     @Override
@@ -63,19 +55,6 @@ public class AuthorManager implements AuthorIterface {
     }
 
     @Override
-    public void deleteAuthor(int id){
-        Author authorToRemove = null;
-        for (Author author: authors){
-            if (author.getId() == id){
-                authorToRemove = author;
-            }
-        }
-        if (authorToRemove != null){
-            authors.remove(authorToRemove);
-        }
-    }
-
-    @Override
     public boolean checkAuthor(int id){
         for(Author author: authors){
             if(author.getId() == id){
@@ -83,19 +62,6 @@ public class AuthorManager implements AuthorIterface {
             }
         }
         return false;
-    }
-
-    @Override
-    public List<Author> getAuthorsByPostId(List<Posts_Authors> pa){
-        List<Author> authorsToReturn = new ArrayList<>();
-        for(Posts_Authors par: pa){
-            for(Author author: authors){
-                if(author.getId() == par.getId_author()){
-                    authorsToReturn.add(author);
-                }
-            }
-        }
-        return authorsToReturn;
     }
 
     @Override
