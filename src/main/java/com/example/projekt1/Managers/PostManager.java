@@ -1,83 +1,57 @@
 package com.example.projekt1.Managers;
 
 import com.example.projekt1.Interfaces.PostInterface;
+import com.example.projekt1.Interfaces.PostInterfaceCustom;
+import com.example.projekt1.Models.Author;
 import com.example.projekt1.Models.Post;
-import com.example.projekt1.Models.Posts_Authors;
-import com.opencsv.CSVWriter;
-import com.opencsv.bean.CsvToBean;
-import com.opencsv.bean.CsvToBeanBuilder;
-import com.opencsv.bean.StatefulBeanToCsv;
-import com.opencsv.bean.StatefulBeanToCsvBuilder;
-import com.opencsv.exceptions.CsvDataTypeMismatchException;
-import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
-public class PostManager implements PostInterface {
+public class PostManager implements PostInterfaceCustom {
 
-    private static List<Post> posts;
+    public PostInterface pi;
 
-    public PostManager() throws FileNotFoundException {
-        Reader reader = new BufferedReader(new FileReader("src/main/java/com/example/projekt1/csv/Posts.csv"));
-        CsvToBean<Post> csvReader = new CsvToBeanBuilder(reader)
-                .withType(Post.class).withSeparator(',').withIgnoreQuotations(false)
-                .withIgnoreLeadingWhiteSpace(true).build();
-        posts = csvReader.parse();
+    public PostManager(PostInterface pi) throws FileNotFoundException {
+        this.pi = pi;
     }
 
+
     @Override
-    public void save() throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException {
-        try(Writer writer = Files.newBufferedWriter(Paths.get("src/main/java/com/example/projekt1/csv/Posts.csv"));){
-            StatefulBeanToCsv<Post> beanToCsv = new StatefulBeanToCsvBuilder(writer).withQuotechar(CSVWriter.DEFAULT_QUOTE_CHARACTER).build();
-            beanToCsv.write(posts);
+    public void addPost(Post post, List<Integer> auhtorId, AuthorManager am, List<Integer> tagId, TagManager ti){
+        Post postToSave = new Post();
+        postToSave.setId(post.getId());
+        postToSave.setPost_content(post.getPost_content());
+        for(int id: auhtorId){
+            postToSave.getAuthors().add(am.findById(id));
         }
-    }
-
-
-    @Override
-    public void addPost(Post post){
-        posts.add(post);
-    }
-
-    @Override
-    public List<Post> getAllPosts(){ return posts; }
-
-    @Override
-    public Post getPostById(int id){
-        Post postToReturn = null;
-        for (Post post: posts){
-            if (post.getId() == id){
-                postToReturn = post;
-            }
+        for(int id: tagId){
+            postToSave.getTags().add(ti.findById(id));
         }
-        return postToReturn;
+        pi.save(postToSave);
     }
 
     @Override
-    public void deletePost(int id){
-        Post postToRemove = null;
-        for (Post post: posts){
-            if (post.getId() == id){
-                postToRemove = post;
-            }
-        }
-        if (postToRemove != null){
-            posts.remove(postToRemove);
-        }
-    }
+    public List<Post> findAll(){ return pi.findAll(); }
+
+    @Override
+    public Post findById(int id){ return pi.findById(id); }
+
+    @Override
+    public void deletePost(int id){ pi.deleteById(id); }
 
     @Override
     public boolean checkPost(int id){
-        for (Post post: posts){
-            if (post.getId() == id){
+        List<Post> posts = pi.findAll();
+        for(Post post: posts){
+            if(post.getId() == id){
                 return true;
             }
         }
@@ -86,6 +60,7 @@ public class PostManager implements PostInterface {
 
     @Override
     public List<Post> getPostsByContent(String contentInput){
+        List<Post> posts = pi.findAll();
         List<Post> postsToReturn = new ArrayList<>();
         String[] contents = contentInput.split(" ");
         Pattern pattern;
@@ -107,7 +82,7 @@ public class PostManager implements PostInterface {
     @Override
     public List<Post> getPostsByTags(String tagsInput){
         List<Post> postsToReturn = new ArrayList<>();
-        String[] tags = tagsInput.split(" ");
+        /*String[] tags = tagsInput.split(" ");
         Pattern pattern;
         Matcher matcher;
         boolean matchFound;
@@ -120,20 +95,13 @@ public class PostManager implements PostInterface {
                     postsToReturn.add(post);
                 }
             }
-        }
+        }*/
         return postsToReturn;
     }
 
+
     @Override
-    public List<Post> getPostsByAuthors(List<Posts_Authors> pa){
-        List<Post> postsToReturn = new ArrayList<>();
-        for(Posts_Authors par: pa){
-            for(Post post: posts){
-                if(post.getId() == par.getId_post()){
-                    postsToReturn.add(post);
-                }
-            }
-        }
-        return postsToReturn;
+    public void save(Post post){
+        pi.save(post);
     }
 }

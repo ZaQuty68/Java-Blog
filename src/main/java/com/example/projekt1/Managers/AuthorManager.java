@@ -1,5 +1,6 @@
 package com.example.projekt1.Managers;
 
+import com.example.projekt1.Interfaces.AuthorInterfaceCustom;
 import com.example.projekt1.Interfaces.AuthorIterface;
 import com.example.projekt1.Models.Author;
 import com.opencsv.CSVWriter;
@@ -9,6 +10,7 @@ import com.opencsv.bean.StatefulBeanToCsv;
 import com.opencsv.bean.StatefulBeanToCsvBuilder;
 import com.opencsv.exceptions.CsvDataTypeMismatchException;
 import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -20,42 +22,26 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
-public class AuthorManager implements AuthorIterface {
+public class AuthorManager implements AuthorInterfaceCustom {
 
-    private static List<Author> authors;
 
-    public AuthorManager() throws FileNotFoundException {
-        Reader reader = new BufferedReader(new FileReader("src/main/java/com/example/projekt1/csv/Authors.csv"));
-        CsvToBean<Author> csvReader = new CsvToBeanBuilder(reader)
-                .withType(Author.class).withSeparator(',').withIgnoreQuotations(false)
-                .withIgnoreLeadingWhiteSpace(true).build();
-        authors = csvReader.parse();
-    }
+    public AuthorIterface ai;
+
+    public AuthorManager(AuthorIterface ai){ this.ai = ai; }
 
     @Override
-    public void save() throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException {
-        try(Writer writer = Files.newBufferedWriter(Paths.get("src/main/java/com/example/projekt1/csv/Authors.csv"));){
-            StatefulBeanToCsv<Author> beanToCsv = new StatefulBeanToCsvBuilder(writer).withQuotechar(CSVWriter.NO_QUOTE_CHARACTER).build();
-            beanToCsv.write(authors);
-        }
-    }
-
-    @Override
-    public List<Author> getAllAuthors() { return authors; }
-
-    @Override
-    public Author getAuthorById(int id){
-        Author authorToReturn = null;
-        for (Author author: authors){
-            if (author.getId() == id){
-                authorToReturn = author;
-            }
-        }
-        return authorToReturn;
+    public void addAuthor(Author author){
+        Author authorToSave = new Author();
+        authorToSave.setId(author.getId());
+        authorToSave.setUsername(author.getUsername());
+        authorToSave.setFirst_name(author.getFirst_name());
+        authorToSave.setLast_name(author.getLast_name());
+        ai.save(authorToSave);
     }
 
     @Override
     public boolean checkAuthor(int id){
+        List<Author> authors = ai.findAll();
         for(Author author: authors){
             if(author.getId() == id){
                 return true;
@@ -65,15 +51,26 @@ public class AuthorManager implements AuthorIterface {
     }
 
     @Override
-    public List<Author> getAuthorsByUsername(String usernameInput){
+    public List<Author> findAll(){
+        return ai.findAll();
+    }
+
+    @Override
+    public Author findById(int id){
+        return ai.findById(id);
+    }
+
+    @Override
+    public List<Author> findAllByUsername(String username){
+        List<Author> authors = ai.findAll();
         List<Author> authorsToReturn = new ArrayList<>();
-        String[] usernames = usernameInput.split(" ");
+        String[] usernames = username.split(" ");
         Pattern pattern;
         Matcher matcher;
         boolean matchFound;
         for(Author author: authors){
-            for(String username: usernames){
-                pattern = Pattern.compile(username, Pattern.CASE_INSENSITIVE);
+            for(String s: usernames){
+                pattern = Pattern.compile(s, Pattern.CASE_INSENSITIVE);
                 matcher = pattern.matcher(author.getUsername());
                 matchFound = matcher.find();
                 if(matchFound){
@@ -83,4 +80,8 @@ public class AuthorManager implements AuthorIterface {
         }
         return authorsToReturn;
     }
+
+
+
+
 }

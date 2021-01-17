@@ -1,58 +1,49 @@
 package com.example.projekt1.Managers;
 
 import com.example.projekt1.Interfaces.CommentInterface;
+import com.example.projekt1.Interfaces.CommentInterfaceCustom;
 import com.example.projekt1.Models.Comment;
-import com.opencsv.CSVWriter;
-import com.opencsv.bean.CsvToBean;
-import com.opencsv.bean.CsvToBeanBuilder;
-import com.opencsv.bean.StatefulBeanToCsv;
-import com.opencsv.bean.StatefulBeanToCsvBuilder;
-import com.opencsv.exceptions.CsvDataTypeMismatchException;
-import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
+import com.example.projekt1.Models.CommentDTO;
+import com.example.projekt1.Models.Post;
 import org.springframework.stereotype.Service;
 
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
-public class CommentManager implements CommentInterface {
+public class CommentManager implements CommentInterfaceCustom {
 
-    private static List<Comment> comments;
+    public CommentInterface ci;
 
-    public CommentManager() throws FileNotFoundException {
-        Reader reader = new BufferedReader(new FileReader("src/main/java/com/example/projekt1/csv/Comments2.csv"));
-        CsvToBean<Comment> csvReader = new CsvToBeanBuilder(reader)
-                .withType(Comment.class).withSeparator(',').withIgnoreQuotations(false)
-                .withIgnoreLeadingWhiteSpace(true).build();
-        comments = csvReader.parse();
+    public CommentManager(CommentInterface ci){
+        this.ci = ci;
     }
 
     @Override
-    public void save() throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException {
-        try(Writer writer = Files.newBufferedWriter(Paths.get("src/main/java/com/example/projekt1/csv/Comments2.csv"));){
-            StatefulBeanToCsv<Comment> beanToCsv = new StatefulBeanToCsvBuilder(writer).withQuotechar(CSVWriter.DEFAULT_QUOTE_CHARACTER).build();
-            beanToCsv.write(comments);
-        }
+    public void addComment(CommentDTO comment, PostManager pm){
+        Comment commentToSave = new Comment();
+        commentToSave.setId(comment.getId());
+        commentToSave.setUsername(comment.getUsername());
+        commentToSave.setComment_content(comment.getComment_content());
+        ci.save(commentToSave);
+        Post postToSave = pm.findById(comment.getPost_id());
+        postToSave.getComments().add(commentToSave);
+        pm.save(postToSave);
     }
 
     @Override
-    public void addComment(Comment comment){
-        comments.add(comment);
-    }
-
-    @Override
-    public List<Comment> getAllComments(){ return comments; }
+    public List<Comment> findAll(){ return ci.findAll(); }
 
     @Override
     public void deleteCommentsByPostId(int id){
-        List<Comment> commentsToDelete = new ArrayList<>();
+        /*List<Comment> commentsToDelete = new ArrayList<>();
+        List<Comment> comments = ci.findAll();
         for(Comment comment: comments){
-            if(comment.getId_post() == id){
+            if(comment.getPost().getId() == id){
                 commentsToDelete.add(comment);
             }
         }
@@ -61,34 +52,19 @@ public class CommentManager implements CommentInterface {
                 comments.remove(comment);
             }
         }
+
+         */
     }
 
     @Override
-    public Comment getCommentById(int id){
-        Comment commentToReturn = null;
-        for (Comment comment: comments){
-            if (comment.getId() == id){
-                commentToReturn = comment;
-            }
-        }
-        return commentToReturn;
-    }
+    public Comment findById(int id){ return ci.findById(id); }
 
     @Override
-    public void deleteComment(int id){
-        Comment commentToRemove = null;
-        for (Comment comment: comments){
-            if (comment.getId() == id){
-                commentToRemove = comment;
-            }
-        }
-        if (commentToRemove != null){
-            comments.remove(commentToRemove);
-        }
-    }
+    public void deleteById(int id){ ci.deleteById(id); }
 
     @Override
     public boolean checkComment(int id){
+        List<Comment> comments = ci.findAll();
         for(Comment comment: comments){
             if(comment.getId() == id){
                 return true;
@@ -99,6 +75,7 @@ public class CommentManager implements CommentInterface {
 
     @Override
     public List<Comment> getCommentsByUsername(String username){
+        List<Comment> comments = ci.findAll();
         List<Comment> commentsToReturn = new ArrayList<>();
         Pattern pattern = Pattern.compile(username, Pattern.CASE_INSENSITIVE);
         Matcher matcher;
@@ -115,6 +92,7 @@ public class CommentManager implements CommentInterface {
 
     @Override
     public boolean checkCommentsByUsername(String username){
+        List<Comment> comments = ci.findAll();
         Pattern pattern = Pattern.compile("^" + username + "$");
         Matcher matcher;
         boolean matchFound, flag=false;

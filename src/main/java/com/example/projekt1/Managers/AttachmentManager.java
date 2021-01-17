@@ -1,7 +1,10 @@
 package com.example.projekt1.Managers;
 
 import com.example.projekt1.Interfaces.AttachmentInterface;
+import com.example.projekt1.Interfaces.AttachmentInterfaceCustom;
 import com.example.projekt1.Models.Attachment;
+import com.example.projekt1.Models.AttachmentDTO;
+import com.example.projekt1.Models.Post;
 import com.opencsv.CSVWriter;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
@@ -18,35 +21,34 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class AttachmentManager implements AttachmentInterface {
+public class AttachmentManager implements AttachmentInterfaceCustom {
 
-    private static List<Attachment> attachments;
+    public AttachmentInterface ai;
 
-    public AttachmentManager() throws FileNotFoundException {
-        Reader reader = new BufferedReader(new FileReader("src/main/java/com/example/projekt1/csv/Attachments.csv"));
-        CsvToBean<Attachment> csvReader = new CsvToBeanBuilder(reader)
-                .withType(Attachment.class).withSeparator(',').withIgnoreQuotations(false)
-                .withIgnoreLeadingWhiteSpace(true).build();
-        attachments = csvReader.parse();
+    public AttachmentManager(AttachmentInterface ai){ this.ai = ai; }
+
+
+    @Override
+    public void addAttachment(AttachmentDTO attachment, PostManager pm){
+        Attachment attachmentToSave = new Attachment();
+        attachmentToSave.setId(attachment.getId());
+        attachmentToSave.setFilename(attachment.getFilename());
+        ai.save(attachmentToSave);
+        Post postToSave = pm.findById(attachment.getPost_id());
+        postToSave.getAttachments().add(attachmentToSave);
+        pm.save(postToSave);
     }
 
     @Override
-    public void save() throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException {
-        try(Writer writer = Files.newBufferedWriter(Paths.get("src/main/java/com/example/projekt1/csv/Attachments.csv"));){
-            StatefulBeanToCsv<Attachment> beanToCsv = new StatefulBeanToCsvBuilder(writer).withQuotechar(CSVWriter.NO_QUOTE_CHARACTER).build();
-            beanToCsv.write(attachments);
-        }
-    }
+    public List<Attachment> findAll(){ return ai.findAll(); }
 
     @Override
-    public void addAttachment(Attachment attachment){
-        attachments.add(attachment);
-    }
+    public Attachment findById(int id){ return ai.findById(id); }
 
     @Override
-    public List<Attachment> getAllAttachments(){ return attachments; }
+    public void deleteById(int id){ ai.deleteById(id); }
 
-    @Override
+    /*@Override
     public void deleteAttachments(int id){
         List<Attachment> attachmentsToDelete = new ArrayList<>();
         for (Attachment attachment: attachments){
@@ -77,4 +79,6 @@ public class AttachmentManager implements AttachmentInterface {
             }
         }
     }
+
+     */
 }

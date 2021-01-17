@@ -1,23 +1,16 @@
 package com.example.projekt1.Interfaces;
 
 import com.example.projekt1.Models.Author;
-import com.example.projekt1.Models.Posts_Authors;
-import com.opencsv.exceptions.CsvDataTypeMismatchException;
-import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.io.IOException;
 import java.util.List;
 
-public interface AuthorIterface {
+public interface AuthorIterface extends JpaRepository<Author, Integer> {
 
-    List<Author> getAllAuthors();
+    List<Author> findAll();
 
-    Author getAuthorById(int id);
-
-    boolean checkAuthor(int id);
-
-    List<Author> getAuthorsByUsername(String pattern);
-
-    void save() throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException;
+    Author findById(int id);
 
 }
+
+

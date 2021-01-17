@@ -1,21 +1,15 @@
 package com.example.projekt1.Interfaces;
 
 import com.example.projekt1.Models.Attachment;
-import com.opencsv.exceptions.CsvDataTypeMismatchException;
-import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.io.IOException;
 import java.util.List;
 
-public interface AttachmentInterface {
+public interface AttachmentInterface extends JpaRepository<Attachment, Integer> {
 
-    void addAttachment(Attachment attachment);
+    List<Attachment> findAll();
 
-    List<Attachment> getAllAttachments();
+    Attachment findById(int id);
 
-    void deleteAttachments(int id);
-
-    void deleteAttachment(int id, String filename);
-
-    void save() throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException;
+    void deleteById(int id);
 }

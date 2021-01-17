@@ -1,34 +1,13 @@
 package com.example.projekt1.Controllers;
 
-import com.example.projekt1.Managers.*;
-import com.example.projekt1.Models.Attachment;
-import com.example.projekt1.Models.Comment;
-import com.example.projekt1.Models.Post;
-import com.example.projekt1.Models.Posts_Authors;
-import com.opencsv.exceptions.CsvDataTypeMismatchException;
-import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.validation.Errors;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import javax.validation.Valid;
-import java.io.IOException;
-import java.util.List;
 
 
 @Controller
 public class BlogController {
     private int pid=150, cid=200;
 
-    @Autowired
+    /*@Autowired
     AttachmentManager atm;
     @Autowired
     AuthorManager aum;
@@ -384,4 +363,6 @@ public class BlogController {
         List<Post> posts = pm.getPostsByAuthors(pam.getByAuthor(aum.getAuthorById(id)));
         return new ResponseEntity<Object>(posts, HttpStatus.OK);
     }
+
+     */
 }

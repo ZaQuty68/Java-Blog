@@ -1,30 +1,17 @@
 package com.example.projekt1.Interfaces;
 
 import com.example.projekt1.Models.Comment;
-import com.opencsv.exceptions.CsvDataTypeMismatchException;
-import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
+import com.example.projekt1.Models.Post;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
-import java.io.IOException;
 import java.util.List;
 
-public interface CommentInterface {
+public interface CommentInterface extends JpaRepository<Comment, Integer> {
 
-    void addComment(Comment comment);
+    List<Comment> findAll();
 
-    List<Comment> getAllComments();
+    Comment findById(int id);
 
-    void deleteCommentsByPostId(int id);
-
-    Comment getCommentById(int id);
-
-    void deleteComment(int id);
-
-    boolean checkComment(int id);
-
-    List<Comment> getCommentsByUsername(String username);
-
-    boolean checkCommentsByUsername(String username);
-
-    void save() throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException;
-
+    void deleteById(int id);
 }
