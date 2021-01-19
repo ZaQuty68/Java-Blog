@@ -1,8 +1,6 @@
 package com.example.projekt1.Models;
 
-import com.example.projekt1.Validators.Tags;
 import lombok.Data;
-import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;

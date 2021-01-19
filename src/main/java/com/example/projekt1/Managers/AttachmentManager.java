@@ -36,7 +36,13 @@ public class AttachmentManager implements AttachmentInterfaceCustom {
             id = 1;
         }
         else{
-            id = ai.findAll().get(ai.findAll().size()-1).getId() + 1;
+            id = ai.findAll().get(0).getId();
+            for(Attachment attachmentId: ai.findAll()){
+                if(attachmentId.getId() > id){
+                    id = attachmentId.getId();
+                }
+            }
+            id++;
         }
         attachmentToSave.setId(id);
         attachmentToSave.setFilename(attachment.getFilename());
@@ -55,37 +61,6 @@ public class AttachmentManager implements AttachmentInterfaceCustom {
     @Override
     public void deleteById(int id){ ai.deleteById(id); }
 
-    /*@Override
-    public void deleteAttachments(int id){
-        List<Attachment> attachmentsToDelete = new ArrayList<>();
-        for (Attachment attachment: attachments){
-            if (attachment.getId_post() == id){
-                attachmentsToDelete.add(attachment);
-            }
-        }
-        if (!attachmentsToDelete.isEmpty()){
-            for (Attachment attachment: attachmentsToDelete){
-                attachments.remove(attachment);
-            }
-        }
-    }
-
     @Override
-    public void deleteAttachment(int id, String filename){
-        List<Attachment> attachmentsToDelete = new ArrayList<>();
-        for (Attachment attachment: attachments){
-            if(attachment.getId_post() == id){
-                if(attachment.getFilename().matches("^" + filename + "$")){
-                    attachmentsToDelete.add(attachment);
-                }
-            }
-        }
-        if(!attachmentsToDelete.isEmpty()){
-            for(Attachment attachment: attachmentsToDelete){
-                attachments.remove(attachment);
-            }
-        }
-    }
-
-     */
+    public Attachment findByFilename(String filename){ return ai.findByFilename(filename); }
 }

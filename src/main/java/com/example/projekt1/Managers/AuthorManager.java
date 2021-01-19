@@ -29,7 +29,8 @@ public class AuthorManager implements AuthorInterfaceCustom {
 
     public AuthorManager(AuthorIterface ai){
         this.ai = ai;
-        if(ai.findById(0) == null){
+        //////////////UNLOCK THIS IF U WANT ADMIN TO BE MADE INSIDE PROGRAM
+        /*if(ai.findById(0) == null){
             Author admin = new Author();
             admin.setId(0);
             admin.setFirst_name("Sebastian");
@@ -38,6 +39,8 @@ public class AuthorManager implements AuthorInterfaceCustom {
             admin.setPassword("Admin");
             this.ai.save(admin);
         }
+
+         */
     }
 
     @Override
@@ -48,7 +51,13 @@ public class AuthorManager implements AuthorInterfaceCustom {
             id = 1;
         }
         else{
-            id = ai.findAll().get(ai.findAll().size()-1).getId() + 1;
+            id = ai.findAll().get(0).getId();
+            for(Author authorId: ai.findAll()){
+                if(authorId.getId() > id){
+                    id = authorId.getId();
+                }
+            }
+            id++;
         }
         authorToSave.setId(id);
         authorToSave.setUsername(author.getUsername());
@@ -100,16 +109,16 @@ public class AuthorManager implements AuthorInterfaceCustom {
     }
 
     @Override
-    public List<Author> findAllByUsername(String username){
+    public List<Author> getAuthorsByUsername(String usernameInput){
         List<Author> authors = ai.findAll();
         List<Author> authorsToReturn = new ArrayList<>();
-        String[] usernames = username.split(" ");
+        String[] usernames = usernameInput.split(" ");
         Pattern pattern;
         Matcher matcher;
         boolean matchFound;
         for(Author author: authors){
-            for(String s: usernames){
-                pattern = Pattern.compile(s, Pattern.CASE_INSENSITIVE);
+            for(String username: usernames){
+                pattern = Pattern.compile(username, Pattern.CASE_INSENSITIVE);
                 matcher = pattern.matcher(author.getUsername());
                 matchFound = matcher.find();
                 if(matchFound){
@@ -123,7 +132,8 @@ public class AuthorManager implements AuthorInterfaceCustom {
     @Override
     public void save(Author author){ ai.save(author); }
 
-
+    @Override
+    public void deleteById(int id){ ai.deleteById(id); }
 
 
 }

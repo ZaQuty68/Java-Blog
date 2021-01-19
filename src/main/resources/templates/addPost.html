@@ -7,6 +7,11 @@
 </head>
 <body>
     <h1>Adding new post</h1>
+
+    <div class="logOut">
+        <a th:href="@{'/'}" class="button-red">Log out</a>
+    </div><br/>
+
     <div class="block">
         <form method="POST" enctype="multipart/form-data" th:action="@{/addPost}" th:object="${post}">
             <div th:if="${#fields.hasErrors()}">
@@ -28,11 +33,23 @@
             <br/><br/>
 
             <label for="file">Attachment to upload:</label>
-            <input type="file" name="file" id="file"/>
+            <input type="file" name="file" id="file" class="button-file"/>
             <br/><br/>
 
-            <label for="tags">Tags:</label>
-            <input type="text" name="tags" id="tags" pattern="^(\s*\S+\s+){0,3}\S+\s*$" title="There is from 1 to 4 tags allowed"/>
+            <label for="tag1">Tag #1:</label>
+            <input type="text" name="tag1" id="tag1" required="required" pattern="^[a-zA-Z0-9]+$" title="Must contain only numbers and letters!"/>
+            <br/><br/>
+
+            <label for="tag2">Tag #2:</label>
+            <input type="text" name="tag2" id="tag2" pattern="^[a-zA-Z0-9]+$" title="Must contain only numbers and letters!"/>
+            <br/><br/>
+
+            <label for="tag3">Tag #3:</label>
+            <input type="text" name="tag3" id="tag3" pattern="^[a-zA-Z0-9]+$" title="Must contain only numbers and letters!"/>
+            <br/><br/>
+
+            <label for="tag4">Tag #4:</label>
+            <input type="text" name="tag4" id="tag4" pattern="^[a-zA-Z0-9]+$" title="Must contain only numbers and letters!"/>
             <br/><br/>
 
             <input type="submit" value="Submit"/>

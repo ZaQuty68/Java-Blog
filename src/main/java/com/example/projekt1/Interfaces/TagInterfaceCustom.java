@@ -12,7 +12,11 @@ public interface TagInterfaceCustom {
 
     void addTag(Tag tag);
 
-    List<Integer> getTagsId(String tags);
+    List<Integer> getTagsId(String tag1, String tag2, String tag3, String tag4);
 
     Tag findByTitle(String title);
+
+    boolean checkByTitle(String title);
+
+    List<Tag> getTagsByTitle(String titleInput);
 }

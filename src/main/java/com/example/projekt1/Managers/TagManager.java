@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class TagManager implements TagInterfaceCustom {
@@ -23,11 +25,17 @@ public class TagManager implements TagInterfaceCustom {
             id = 1;
         }
         else{
-            id = ti.findAll().get(ti.findAll().size()-1).getId() + 1;
+            id = ti.findAll().get(0).getId();
+            for(Tag tagId: ti.findAll()){
+                if(tagId.getId() > id){
+                    id = tagId.getId();
+                }
+            }
+            id++;
         }
         tagToSave.setId(id);
         tagToSave.setTitle(tag.getTitle());
-        ti.save(tag);
+        ti.save(tagToSave);
     }
 
     @Override
@@ -37,21 +45,62 @@ public class TagManager implements TagInterfaceCustom {
     public Tag findById(int id) { return ti.findById(id); }
 
     @Override
-    public List<Integer> getTagsId(String tags){
+    public List<Integer> getTagsId(String tag1, String tag2, String tag3, String tag4){
         List<Integer> tagsId = new ArrayList<>();
-        String[] titles = tags.split(" ");
+        List<String> titles = new ArrayList<>();
+        titles.add(tag1);
+        if(!tag2.isEmpty()){
+            titles.add(tag2);
+        }
+        if(!tag3.isEmpty()){
+            titles.add(tag3);
+        }
+        if(!tag4.isEmpty()){
+            titles.add(tag4);
+        }
         for(String title: titles){
             Tag tag = ti.findByTitle(title);
             if(tag == null){
                 tag = new Tag();
                 tag.setTitle(title);
                 addTag(tag);
+                tag = ti.findByTitle(title);
             }
-            tagsId.add(ti.findByTitle(title).getId());
+            tagsId.add(tag.getId());
         }
         return tagsId;
     }
 
     @Override
     public Tag findByTitle(String title){ return ti.findByTitle(title); }
+
+    @Override
+    public boolean checkByTitle(String title){
+        Tag tag= ti.findByTitle(title);
+        if(tag == null){
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public List<Tag> getTagsByTitle(String titleInput){
+        List<Tag> tags = ti.findAll();
+        List<Tag> tagsToReturn = new ArrayList<>();
+        String[] titles = titleInput.split(" ");
+        Pattern pattern;
+        Matcher matcher;
+        boolean matchFound;
+        for(Tag tag: tags){
+            for(String title: titles){
+                pattern = Pattern.compile(title, Pattern.CASE_INSENSITIVE);
+                matcher = pattern.matcher(tag.getTitle());
+                matchFound = matcher.find();
+                if(matchFound){
+                    tagsToReturn.add(tag);
+                }
+            }
+        }
+        return tagsToReturn;
+    }
 }

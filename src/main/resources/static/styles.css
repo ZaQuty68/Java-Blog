@@ -76,6 +76,9 @@ input[type=submit]:hover{
     display: inline-block;
     text-decoration: none;
 }
+.button-file{
+    width: 50%;
+}
 
 .block{
     background-color: #a3c2c2;

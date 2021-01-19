@@ -12,4 +12,6 @@ public interface AttachmentInterface extends JpaRepository<Attachment, Integer> 
     Attachment findById(int id);
 
     void deleteById(int id);
+
+    Attachment findByFilename(String filename);
 }

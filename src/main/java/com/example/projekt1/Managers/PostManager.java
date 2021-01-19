@@ -2,9 +2,9 @@ package com.example.projekt1.Managers;
 
 import com.example.projekt1.Interfaces.PostInterface;
 import com.example.projekt1.Interfaces.PostInterfaceCustom;
-import com.example.projekt1.Models.Author;
-import com.example.projekt1.Models.Post;
+import com.example.projekt1.Models.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -25,14 +25,20 @@ public class PostManager implements PostInterfaceCustom {
 
 
     @Override
-    public void addPost(Post post, List<Integer> auhtorId, AuthorManager am, List<Integer> tagId, TagManager ti){
+    public void addPost(Post post, List<Integer> auhtorId, AuthorManager am, List<Integer> tagId, TagManager tm, MultipartFile file, StorageManager sm, AttachmentManager atm){
         Post postToSave = new Post();
         int id;
         if(pi.findAll().isEmpty()){
             id = 1;
         }
         else{
-            id = pi.findAll().get(pi.findAll().size()-1).getId() + 1;
+            id = pi.findAll().get(0).getId();
+            for(Post postId: pi.findAll()){
+                if(postId.getId() > id){
+                    id = postId.getId();
+                }
+            }
+            id++;
         }
         postToSave.setId(id);
         postToSave.setPost_content(post.getPost_content());
@@ -40,7 +46,29 @@ public class PostManager implements PostInterfaceCustom {
             postToSave.getAuthors().add(am.findById(id2));
         }
         for(int id2: tagId){
-            postToSave.getTags().add(ti.findById(id2));
+            postToSave.getTags().add(tm.findById(id2));
+        }
+        pi.save(postToSave);
+        if(!file.isEmpty()){
+            sm.store(file);
+            AttachmentDTO attachment = new AttachmentDTO();
+            attachment.setFilename(file.getOriginalFilename());
+            attachment.setPost_id(postToSave.getId());
+            atm.addAttachment(attachment, this);
+        }
+    }
+
+    @Override
+    public void editPost(Post post, int id, List<Integer> authorId, AuthorManager am, List<Integer> tagId, TagManager tm){
+        Post postToSave = pi.findById(id);
+        postToSave.setPost_content(post.getPost_content());
+        postToSave.getAuthors().clear();
+        for(int id2: authorId){
+            postToSave.getAuthors().add(am.findById(id2));
+        }
+        postToSave.getTags().clear();
+        for(int id2: tagId){
+            postToSave.getTags().add(tm.findById(id2));
         }
         pi.save(postToSave);
     }
@@ -52,17 +80,15 @@ public class PostManager implements PostInterfaceCustom {
     public Post findById(int id){ return pi.findById(id); }
 
     @Override
-    public void deletePost(int id){ pi.deleteById(id); }
+    public void deleteById(int id){ pi.deleteById(id); }
 
     @Override
-    public boolean checkPost(int id){
-        List<Post> posts = pi.findAll();
-        for(Post post: posts){
-            if(post.getId() == id){
-                return true;
-            }
+    public boolean checkById(int id){
+        Post post = pi.findById(id);
+        if(post == null){
+            return false;
         }
-        return false;
+        return true;
     }
 
     @Override
@@ -87,22 +113,51 @@ public class PostManager implements PostInterfaceCustom {
     }
 
     @Override
-    public List<Post> getPostsByTags(String tagsInput){
+    public List<Post> getPostsByAuthors(List<Author> authors){
         List<Post> postsToReturn = new ArrayList<>();
-        /*String[] tags = tagsInput.split(" ");
-        Pattern pattern;
-        Matcher matcher;
-        boolean matchFound;
+        List<Post> posts = pi.findAll();
         for(Post post: posts){
-            for(String tag: tags){
-                pattern = Pattern.compile(tag, Pattern.CASE_INSENSITIVE);
-                matcher = pattern.matcher(post.getTags());
-                matchFound = matcher.find();
-                if(matchFound){
-                    postsToReturn.add(post);
+            boolean flag = false;
+            for(Author author: authors){
+                for(Author authorP: post.getAuthors()){
+                    if(authorP.equals(author)){
+                        flag = true;
+                    }
                 }
             }
-        }*/
+            if(flag){
+                postsToReturn.add(post);
+            }
+        }
+        return postsToReturn;
+    }
+
+    @Override
+    public List<Post> getPostsByTags(List<Tag> tags){
+        List<Post> postsToReturn = new ArrayList<>();
+        List<Post> posts = pi.findAll();
+        for(Post post: posts){
+            boolean flag = false;
+            for(Tag tag: tags){
+                for(Tag tagP: post.getTags()){
+                    if(tagP.equals(tag)){
+                        flag=true;
+                    }
+                }
+            }
+            if(flag){
+                postsToReturn.add(post);
+            }
+        }
+        return postsToReturn;
+    }
+
+    @Override
+    public List<Post> getPostsByComments(List<Comment> comments){
+        List<Post> postsToReturn = new ArrayList<>();
+        for(Comment comment: comments){
+            postsToReturn.add(findByComment(comment.getId()));
+        }
         return postsToReturn;
     }
 
@@ -111,4 +166,29 @@ public class PostManager implements PostInterfaceCustom {
     public void save(Post post){
         pi.save(post);
     }
+
+    @Override
+    public boolean checkIfAuthor(int aid, int pid){
+        Post post = pi.findById(pid);
+        for(Author author: post.getAuthors()){
+            if(author.getId() == aid){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public Post findByComment(int id){
+        for(Post post: pi.findAll()){
+            for(Comment comment: post.getComments()){
+                if(comment.getId() == id){
+                    return post;
+                }
+            }
+        }
+        return null;
+    }
+
+
 }

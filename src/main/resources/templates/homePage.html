@@ -29,48 +29,27 @@
     </div>
     <br/>
 
-    <div>
-        <form method="POST" th:action="@{/searchUser}">
-            <input type="submit" value="Search"/>
-            <label for="username"> for user: </label>
-            <input type="text" name="username" id="username" pattern="[a-zA-Z0-9]+" title="Must contain only numbers and letters!"/>
-        </form>
-    </div>
-
     <br/>
     <a th:href="@{/addPost}" class="button">Add new post</a>
+    <a th:href="@{/authorPage/{id}(id=${userId})}" class="button">Your page</a>
 
 
     <h2>Here are all the posts:</h2>
     <div th:each="post : ${posts}">
         <div class="block">
-            <div th:if="${userId == 0}">
+            <div th:if="${userId == 1}">
                 <a th:href="@{/editPost/{id}(id=${post.id})}" id="editPostAdmin" class="button-red">Edit this post</a>
                 <a th:href="@{/deletePostConfirm/{id}(id=${post.id})}" id="deletePostAdmin" class="button-red">Delete this post</a>
             </div>
-            <div th:unless="${userId == 0}" th:each="author: ${post.authors}" th:if="${author.id == userId}">
+            <div th:unless="${userId == 1}" th:each="author: ${post.authors}" th:if="${author.id == userId}">
                 <a th:href="@{/editPost/{id}(id=${post.id})}" id="editPost" class="button-red">Edit this post</a>
                 <a th:href="@{/deletePostConfirm/{id}(id=${post.id})}" id="deletePost" class="button-red">Delete this post</a>
             </div>
-            <p class="authors">Authors:
-                <span th:each="author : ${post.authors}" >
-                    <a th:href="@{/authorPage/{id}(id=${author.id})}" th:text="${author.username}" class="button-invisible"/>
-                </span>
-            </p>
-            <p class="post">
-                <a th:href="@{/postPage/{id}(id=${post.id})}" th:text = "${post.post_content}" class="button-invisible"/>
-            </p>
-            <p class="attachments">Attachments:
-                <span th:each="attachment : ${post.attachments}">
-                    <a th:text="${attachment.filename}" th:href="@{/files/{filename}(filename=${attachment.filename})}" class="button-invisible"/>
-                </span>
-            </p>
-            <p class="tags">Tags:
-                <span th:each="tag : ${post.tags}">
-                    <a th:text="${tag.title}" th:href="@{/tags/{id}(id=${tag.id})}" class="button-invisible"/>
-                </span>
-            </p>
 
+            <p class="authors">Authors: <span th:each="author : ${post.authors}"><a th:href="@{/authorPage/{id}(id=${author.id})}" th:text="${author.username}" class="button-invisible"/></span></p>
+            <p class="post"><a th:href="@{/postPage/{id}(id=${post.id})}" th:text = "${post.post_content}" class="button-invisible"/></p>
+            <p class="attachments">Attachments: <span th:each="attachment : ${post.attachments}"><a th:text="${attachment.filename}" th:href="@{/files/{filename}(filename=${attachment.filename})}" class="button-invisible"/></span></p>
+            <p class="tags">Tags: <span th:each="tag: ${post.tags}"><a th:text="${tag.title}" th:href="@{/tags/{id}(id=${tag.id})}" class="button-invisible"/></span></p>
 
             <form method="POST" th:action="@{/addComment/{id}(id=${post.id})}" th:object="${comment}">
                 <div th:if="${#fields.hasErrors() and post.id == postIdForCommentErrors}">
@@ -92,8 +71,8 @@
                             <span th:each="commentA : ${author.comments}" th:if="${comment.id == commentA.id}">
                                 <a th:href="@{/authorPage/{id}(id=${author.id})}" th:text="${author.username}" class="button-invisible"/>
                                 <p th:text="${comment.comment_content}"/>
-                                <a th:if="${author.id == userId or userId == 0}" th:href="@{/editComment/{id}(id=${comment.id})}" class="button-red">Edit this comment</a>
-                                <a th:if="${author.id == userId or userId == 0}" th:href="@{/deleteCommentConfirm/{id}(id=${comment.id})}" class="button-red">Delete this comment</a>
+                                <a th:if="${author.id == userId or userId == 1}" th:href="@{/editComment/{id}(id=${comment.id})}" class="button-red">Edit this comment</a>
+                                <a th:if="${author.id == userId or userId == 1}" th:href="@{/deleteCommentConfirm/{id}(id=${comment.id})}" class="button-red">Delete this comment</a>
                             </span>
                         </span>
                     </div>

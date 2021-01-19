@@ -19,11 +19,13 @@ public interface AuthorInterfaceCustom {
 
     Author findById(int id);
 
-    List<Author> findAllByUsername(String username);
+    List<Author> getAuthorsByUsername(String usernameInput);
 
     void addAuthor(Author author);
 
     Author findByUsername(String username);
 
     void save(Author author);
+
+    void deleteById(int id);
 }

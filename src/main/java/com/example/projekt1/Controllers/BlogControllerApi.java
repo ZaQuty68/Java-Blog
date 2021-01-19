@@ -13,7 +13,7 @@ import java.util.List;
 
 @RestController
 public class BlogControllerApi {
-
+/*
     @Autowired
     AuthorManager aum;
     @Autowired
@@ -79,4 +79,6 @@ public class BlogControllerApi {
         am.addAttachment(attachment, pm);
         return am.findById(attachment.getId());
     }
+
+ */
 }

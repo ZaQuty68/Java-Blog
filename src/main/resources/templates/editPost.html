@@ -7,8 +7,13 @@
 </head>
 <body>
     <h1>Editing post</h1>
+    <div class="logOut">
+        <a th:href="@{'/'}" class="button-red">Log out</a>
+    </div><br/>
+
     <div class="block">
-        <p class="authors">Actual authors: <span th:each="par : ${pa}" th:if="${par.id_post == post.id}"><a th:each="author : ${authors}" th:href="@{/authorPage/{id}(id=${author.id})}" th:if="${par.id_author == author.id}" th:text="${author.username}" class="button-invisible"/></span></p>
+        <p class="authors">Authors: <span th:each="author : ${post.authors}"><a th:href="@{/authorPage/{id}(id=${author.id})}" th:text="${author.username}" class="button-invisible"/></span></p>
+
         <form method="POST" th:action="@{/editPost/{id}(id=${post.id})}" th:object="${post}">
             <div th:if="${#fields.hasErrors()}">
                    <span class="error">
@@ -16,56 +21,67 @@
                    </span>
             </div>
             <label for="idA">Authors:</label>
-            <select th:value="${idA}" name="idA" id="idA" multiple="multiple" required="required" class="select">
-               <option th:each="author: ${authors}" th:value="${author.id}" th:text="${author.username}">Username</option>
+            <select th:value="${idA}" name="idA" id="idA" multiple="multiple" class="select">
+               <option th:each="author: ${authors}" th:unless="${author.id == userId}" th:value="${author.id}" th:text="${author.username}">Username</option>
             </select>
             <br/><br/>
 
             <label for="post_content">Post content:</label>
-            <input type="text" th:field="*{post_content}"/>
+            <input type="text" th:field="*{post_content}" id="post_content" autofocus="autofocus"/>
 
-            <span class="error"
-                th:if="${#fields.hasErrors('post_content')}"
-               th:errors="*{post_content}">Post content Error
-            </span>
+            <span class="error" th:if="${#fields.hasErrors('post_content')}" th:errors="*{post_content}">Post content Error</span>
             <br/><br/>
 
-            <label for="tags">Tags:</label>
-            <input type="text" th:field="*{tags}"/>
-
-            <span class="error"
-                 th:if="${#fields.hasErrors('tags')}"
-                th:errors="*{tags}">Tags Error
-               </span>
+            <label for="tag1">Tag #1:</label>
+            <input type="text" name="tag1" id="tag1" th:value="${post.tags[0].title}" required="required" pattern="^[a-zA-Z0-9]+$" title="Must contain only numbers and letters!"/>
             <br/><br/>
+
+            <label for="tag2">Tag #2:</label>
+            <input type="text" name="tag2" id="tag2" th:value="${post.tags.size &gt; 1} ? ${post.tags[1].title} : ''" pattern="^[a-zA-Z0-9]+$" title="Must contain only numbers and letters!"/>
+            <br/><br/>
+
+            <label for="tag3">Tag #3:</label>
+            <input type="text" name="tag3" id="tag3" th:value="${post.tags.size &gt; 2} ? ${post.tags[2].title} : ''" pattern="^[a-zA-Z0-9]+$" title="Must contain only numbers and letters!"/>
+            <br/><br/>
+
+            <label for="tag4">Tag #4:</label>
+            <input type="text" name="tag4" id="tag4" th:value="${post.tags.size &gt; 3} ? ${post.tags[3].title} : ''" pattern="^[a-zA-Z0-9]+$" title="Must contain only numbers and letters!"/>
+            <br/><br/>
+
+
             <input type="submit" value="Submit"/>
             <br/><br/>
         </form>
         <div class="attachments">
            <p>Attachments: </p>
            <table>
-               <tr th:each="attachment : ${attachments}" th:if="${attachment.id_post == post.id}">
+               <tr th:each="attachment : ${post.attachments}">
                    <td><a th:text="${attachment.filename}" th:href="@{/files/{filename}(filename=${attachment.filename})}" class="button-invisible"/></td>
-                   <td><a th:href="@{/deleteAttachment/{id}/{filename}(id=${post.id}, filename=${attachment.filename})}" class="button-red">Delete this attachment</a></td>
+                   <td><a th:href="@{/deleteAttachment/{id}/{aid}(id=${post.id}, aid=${attachment.id})}" class="button-red">Delete this attachment</a></td>
                </tr>
            </table>
         </div>
         <br/>
         <form method="POST" enctype="multipart/form-data" th:action="@{/addAttachment/{id}(id=${post.id})}">
             <label for="file">Attachment to upload:</label>
-            <input type="file" name="file" class="button-invisible"/>
+            <input type="file" name="file" id="file" class="button-file"/>
             <input type="submit" value="Upload" />
         </form>
 
         <br/>
-        <a th:href="@{'/'}" class="button">Cancel</a>
+        <a th:href="@{'/homePage'}" class="button">Cancel</a>
         <br/><br/>
+
         <div class="comments">
             <p>Comments:</p>
-            <div th:each="comment :${comments}" th:if="${post.id == comment.id_post}">
+            <div th:each="comment :${post.comments}">
                 <div class="comment">
-                    <a th:href="@{/userPage/{username}(username=${comment.username})}" th:text="${comment.username}" class="button-invisible"/>
-                    <p th:text="${comment.comment_content}"/>
+                        <span th:each="author : ${authors}">
+                            <span th:each="commentA : ${author.comments}" th:if="${comment.id == commentA.id}">
+                                <a th:href="@{/authorPage/{id}(id=${author.id})}" th:text="${author.username}" class="button-invisible"/>
+                                <p th:text="${comment.comment_content}"/>
+                            </span>
+                        </span>
                 </div>
                 <br/>
             </div>

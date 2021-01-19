@@ -1,17 +1,15 @@
 package com.example.projekt1.Controllers;
 
 import com.example.projekt1.Managers.*;
-import com.example.projekt1.Models.AttachmentDTO;
-import com.example.projekt1.Models.Author;
-import com.example.projekt1.Models.Comment;
-import com.example.projekt1.Models.Post;
+import com.example.projekt1.Models.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
@@ -102,7 +100,7 @@ public class BlogController {
         return "addPost";
     }
     @PostMapping("/addPost")
-    public String processAddingPost(@Valid Post post, Errors errors, int[] id, Model model, @RequestParam("file") MultipartFile file, String tags) throws IOException{
+    public String processAddingPost(@Valid Post post, Errors errors, int[] id, Model model, @RequestParam("file") MultipartFile file, String tag1, String tag2, String tag3, String tag4){
         if(userId == -1){
             return "redirect:/";
         }
@@ -111,180 +109,195 @@ public class BlogController {
             model.addAttribute("userId", userId);
             return "addPost";
         }
-        if(!file.isEmpty()){
-            sm.store(file);
-            AttachmentDTO attachment = new AttachmentDTO();
-            attachment.setFilename(file.getOriginalFilename());
-            attachment.setPost_id(post.getId());
-            am.addAttachment(attachment, pm);
-        }
         List<Integer> authorId = new ArrayList<>();
         authorId.add(userId);
-        for(int i: id){
-            authorId.add(i);
+        if(id != null){
+            for(int i: id){
+                authorId.add(i);
+            }
         }
-        List<Integer> tagId = tm.getTagsId(tags);
-        pm.addPost(post, authorId, aum, tagId, tm);
+        List<Integer> tagId = tm.getTagsId(tag1, tag2, tag3, tag4);
+        pm.addPost(post, authorId, aum, tagId, tm, file, sm, am);
         return "redirect:/homePage";
     }
 
-    /*
-
     @PostMapping("/addComment/{id}")
-    public String addComment(@Valid Comment comment, Errors errors, Model model, @PathVariable int id) throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException{
-        if(!pm.checkPost(id)){
+    public String addComment(@Valid Comment comment, Errors errors, Model model, @PathVariable int id){
+        if(userId == -1){
+            return "redirect:/";
+        }
+        if(!pm.checkById(id)){
             return "redirect:/error/This post does not exist!";
         }
         if(errors.hasErrors()){
-            model.addAttribute("posts", pm.getAllPosts());
-            model.addAttribute("pa", pam.getAllPostsAuthors());
-            model.addAttribute("authors", aum.getAllAuthors());
-            model.addAttribute("comments", cm.getAllComments());
+            model.addAttribute("posts", pm.findAll());
+            model.addAttribute("authors", aum.findAll());
             model.addAttribute("postIdForCommentErrors", id);
-            model.addAttribute("attachments", atm.getAllAttachments());
+            model.addAttribute("userId", userId);
             return "homePage";
         }
-        cid++;
-        comment.setId(cid);
-        comment.setId_post(id);
-        cm.addComment(comment);
-        cm.save();
-        return "redirect:/";
+        CommentDTO commentDTO = new CommentDTO();
+        commentDTO.setComment_content(comment.getComment_content());
+        commentDTO.setAuthor_id(userId);
+        commentDTO.setPost_id(id);
+        cm.addComment(commentDTO, pm, aum);
+        return "redirect:/postPage/" + id;
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////DELETING//////////////////
     @GetMapping("/deletePostConfirm/{id}")
     public String deletePostConfirm(Model model, @PathVariable int id){
-        if(!pm.checkPost(id)){
+        if(userId == -1){
+            return "redirect:/";
+        }
+        if(!pm.checkById(id)){
             return "redirect:/error/This post does not exist!";
         }
-        model.addAttribute("post", pm.getPostById(id));
-        model.addAttribute("pa", pam.getAllPostsAuthors());
-        model.addAttribute("authors", aum.getAllAuthors());
-        model.addAttribute("comments", cm.getAllComments());
-        model.addAttribute("attachments", atm.getAllAttachments());
+        if(userId != 1 && !pm.checkIfAuthor(userId, id)){
+            return "redirect:/error/You dont have permissions to delete this post!";
+        }
+        model.addAttribute("post", pm.findById(id));
+        model.addAttribute("authors", aum.findAll());;
         return "deletePostConfirm";
     }
-    @RequestMapping(value = "/deletePost/{id}", method = RequestMethod.GET)
-    public String deletePost(@PathVariable int id) throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException{
-        if(!pm.checkPost(id)){
+    @GetMapping("/deletePost/{id}")
+    public String deletePost(@PathVariable int id){
+        if(userId == -1){
+            return "redirect:/";
+        }
+        if(!pm.checkById(id)){
             return "redirect:/error/This post does not exist!";
         }
-        pm.deletePost(id);
-        pam.deleteByPostId(id);
-        cm.deleteCommentsByPostId(id);
-        atm.deleteAttachments(id);
-        pm.save();
-        pam.save();
-        cm.save();
-        atm.save();
-        return "redirect:/";
+        if(userId != 1 && !pm.checkIfAuthor(userId, id)){
+            return "redirect:/error/You dont have permissions to delete this post!";
+        }
+        pm.deleteById(id);
+        return "redirect:/homePage";
     }
 
     @GetMapping("/deleteCommentConfirm/{id}")
     public String deleteCommentConfirm(Model model, @PathVariable int id){
-        if(!cm.checkComment(id)){
+        if(userId == -1){
+            return "redirect:/";
+        }
+        if(!cm.checkById(id)){
             return "redirect:/error/This comment does not exist!";
         }
-        model.addAttribute("post", pm.getPostById(cm.getCommentById(id).getId_post()));
-        model.addAttribute("pa", pam.getAllPostsAuthors());
-        model.addAttribute("authors", aum.getAllAuthors());
-        model.addAttribute("comments", cm.getAllComments());
-        model.addAttribute("comment", cm.getCommentById(id));
-        model.addAttribute("attachments", atm.getAllAttachments());
+        if(userId != 1 && !cm.checkIfAuthor(userId, id, aum)){
+            return "redirect:/error/You dont have permissions to delete this comment!";
+        }
+        model.addAttribute("post", pm.findByComment(id));
+        model.addAttribute("authors", aum.findAll());
+        model.addAttribute("comment", cm.findById(id));
         return "deleteCommentConfirm";
     }
+
     @GetMapping("/deleteComment/{id}")
-    public String deleteComment(Model model, @PathVariable int id) throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException{
-        if(!cm.checkComment(id)){
+    public String deleteComment(@PathVariable int id){
+        if(userId == -1){
+            return "redirect:/";
+        }
+        if(!cm.checkById(id)){
             return "redirect:/error/This comment does not exist!";
         }
-        cm.deleteComment(id);
-        cm.save();
-        return "redirect:/";
+        if(userId != 1 && !cm.checkIfAuthor(userId, id, aum)){
+            return "redirect:/error/You dont have permissions to delete this comment!";
+        }
+        int pid = pm.findByComment(id).getId();
+        cm.deleteById(id);
+        return "redirect:/postPage/" + pid;
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////EDITING////////////////
     @GetMapping("/editPost/{id}")
     public String editPost(Model model, @PathVariable int id){
-        if(!pm.checkPost(id)){
+        if(userId == -1){
+            return "redirect:/";
+        }
+        if(!pm.checkById(id)){
             return "redirect:/error/This post does not exist!";
         }
-        model.addAttribute("post", pm.getPostById(id));
-        model.addAttribute("pa", pam.getAllPostsAuthors());
-        model.addAttribute("authors", aum.getAllAuthors());
-        model.addAttribute("comments", cm.getAllComments());
-        model.addAttribute("attachments", atm.getAllAttachments());
+        if(userId != 1 && !pm.checkIfAuthor(userId, id)){
+            return "redirect:/error/You dont have permissions to edit this post!";
+        }
+        model.addAttribute("post", pm.findById(id));
+        model.addAttribute("authors", aum.findAll());
+        model.addAttribute("userId", userId);
         return "editPost";
     }
     @PostMapping("/editPost/{id}")
-    public String processEditPost(@Valid Post post, Errors errors, int[] idA, Model model, @PathVariable int id) throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException{
-        if(!pm.checkPost(id)){
+    public String processEditPost(@Valid Post post, Errors errors, int[] idA, Model model, @PathVariable int id,  String tag1, String tag2, String tag3, String tag4){
+        if(userId == -1){
+            return "redirect:/";
+        }
+        if(!pm.checkById(id)){
             return "redirect:/error/This post does not exist!";
         }
+        if(userId != 1 && !pm.checkIfAuthor(userId, id)){
+            return "redirect:/error/You dont have permissions to edit this post!";
+        }
         if(errors.hasErrors()){
-            model.addAttribute("pa", pam.getAllPostsAuthors());
-            model.addAttribute("authors", aum.getAllAuthors());
-            model.addAttribute("comments", cm.getAllComments());
-            model.addAttribute("attachments", atm.getAllAttachments());
+            model.addAttribute("post", pm.findById(id));
+            model.addAttribute("authors", aum.findAll());
+            model.addAttribute("userId", userId);
             return "editPost";
         }
-        Post postToEdit = pm.getPostById(id);
-        postToEdit.setPost_content(post.getPost_content());
-        postToEdit.setTags(post.getTags());
-        pam.deleteByPostId(id);
-        if(idA.length != 0){
+        List<Integer> authorId = new ArrayList<>();
+        authorId.add(userId);
+        if(idA != null){
             for(int i: idA){
-                Posts_Authors par = new Posts_Authors();
-                par.setId_author(i);
-                par.setId_post(id);
-                pam.addP_A(par);
+                authorId.add(i);
             }
         }
-        pm.save();
-        pam.save();
-        atm.save();
-        return "redirect:/";
+        List<Integer> tagId = tm.getTagsId(tag1, tag2, tag3, tag4);
+        pm.editPost(post, id, authorId, aum, tagId, tm);
+        return "redirect:/postPage/" + id;
     }
 
     @GetMapping("/editComment/{id}")
     public String editComment(Model model, @PathVariable int id){
-        if(!cm.checkComment(id)){
+        if(userId == -1){
+            return "redirect:/";
+        }
+        if(!cm.checkById(id)){
             return "redirect:/error/This comment does not exist!";
         }
-        model.addAttribute("post", pm.getPostById(cm.getCommentById(id).getId_post()));
-        model.addAttribute("pa", pam.getAllPostsAuthors());
-        model.addAttribute("authors", aum.getAllAuthors());
-        model.addAttribute("comments", cm.getAllComments());
-        model.addAttribute("comment", cm.getCommentById(id));
-        model.addAttribute("attachments", atm.getAllAttachments());
+        if(userId != 1 && !cm.checkIfAuthor(userId, id, aum)){
+            return "redirect:/error/You dont have permissions to edit this comment!";
+        }
+        model.addAttribute("post", pm.findByComment(id));
+        model.addAttribute("authors", aum.findAll());
+        model.addAttribute("comment", cm.findById(id));
         return "editComment";
     }
     @PostMapping("/editComment/{id}")
-    public String processEditComment(@Valid Comment comment, Errors errors, Model model, @PathVariable int id) throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException{
-        if(!cm.checkComment(id)){
+    public String processEditComment(@Valid Comment comment, Errors errors, Model model, @PathVariable int id){
+        if(userId == -1){
+            return "redirect:/";
+        }
+        if(!cm.checkById(id)){
             return "redirect:/error/This comment does not exist!";
         }
+        if(userId != 1 && !cm.checkIfAuthor(userId, id, aum)){
+            return "redirect:/error/You dont have permissions to edit this comment!";
+        }
         if(errors.hasErrors()){
-            model.addAttribute("post", pm.getPostById(cm.getCommentById(id).getId_post()));
-            model.addAttribute("pa", pam.getAllPostsAuthors());
-            model.addAttribute("authors", aum.getAllAuthors());
-            model.addAttribute("comments", cm.getAllComments());
-            model.addAttribute("attachments", atm.getAllAttachments());
+            model.addAttribute("post", pm.findByComment(id));
+            model.addAttribute("authors", aum.findAll());
             return "editComment";
         }
-        Comment commentToEdit = cm.getCommentById(id);
-        commentToEdit.setComment_content(comment.getComment_content());
-        commentToEdit.setUsername(comment.getUsername());
-        cm.save();
-        return "redirect:/";
+        cm.editComment(comment, id);
+        return "redirect:/postPage/" + pm.findByComment(id).getId();
     }
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////SEARCHING////////////////////////////
     @PostMapping("/searchPost")
     public String searchPost(Model model, String type, String pattern){
-        if(pattern.length() == 0){
+        if(userId == -1){
             return "redirect:/";
+        }
+        if(pattern.length() == 0){
+            return "redirect:/homePage";
         }
         if(type.equals("content")){
             if(pm.getPostsByContent(pattern).isEmpty()){
@@ -292,78 +305,65 @@ public class BlogController {
             }
             model.addAttribute("posts", pm.getPostsByContent(pattern));
         }
+
         if(type.equals("author")){
-            if(pm.getPostsByAuthors(pam.getByAuthors(aum.getAuthorsByUsername(pattern))).isEmpty()){
+            if(pm.getPostsByAuthors(aum.getAuthorsByUsername(pattern)).isEmpty()){
                 return "redirect:/error/No matches found!";
             }
-            model.addAttribute("posts", pm.getPostsByAuthors(pam.getByAuthors(aum.getAuthorsByUsername(pattern))));
+            model.addAttribute("posts", pm.getPostsByAuthors(aum.getAuthorsByUsername(pattern)));
         }
         if(type.equals("tags")){
-            if(pm.getPostsByTags(pattern).isEmpty()){
+            if(pm.getPostsByTags(tm.getTagsByTitle(pattern)).isEmpty()){
                 return "redirect:/error/No matches found!";
             }
-            model.addAttribute("posts", pm.getPostsByTags(pattern));
+            model.addAttribute("posts", pm.getPostsByTags(tm.getTagsByTitle(pattern)));
         }
-        model.addAttribute("pa", pam.getAllPostsAuthors());
-        model.addAttribute("authors", aum.getAllAuthors());
-        model.addAttribute("comments", cm.getAllComments());
-        model.addAttribute("postIdForCommentErrors", -1);
+        model.addAttribute("authors", aum.findAll());
         model.addAttribute("comment", new Comment());
-        model.addAttribute("attachments", atm.getAllAttachments());
+        model.addAttribute("postIdForCommentErrors", -1);
+        model.addAttribute("userId", userId);
         return "homePage";
     }
 
-    @PostMapping("/searchUser")
-    public String searchUser(Model model, String username){
-        if(username.length() == 0){
-            return "redirect:/";
-        }
-        model.addAttribute("comments", cm.getCommentsByUsername(username));
-        model.addAttribute("i", cm.getCommentsByUsername(username).size());
-        return "searchUser";
-    }
-
     /////////////////////////////////////////////////////////////////////////////////////////////////////SHOWING/////////////////
-    @GetMapping("/userPage/{username}")
-    public String userPage(Model model, @PathVariable String username){
-        if(!cm.checkCommentsByUsername(username)){
-            return "redirect:/error/This user does not exist!";
-        }
-        model.addAttribute("i", cm.getCommentsByUsername(username).size());
-        model.addAttribute("posts", pm.getAllPosts());
-        model.addAttribute("comments", cm.getCommentsByUsername(username));
-        model.addAttribute("username", username);
-        return "userPage";
-    }
-
     @GetMapping("/postPage/{id}")
     public String postPage(Model model, @PathVariable int id){
-        if(!pm.checkPost(id)){
+        if(userId == -1){
+            return "redirect:/";
+        }
+        if(!pm.checkById(id)){
             return "redirect:/error/This post does not exist!";
         }
-        model.addAttribute("post", pm.getPostById(id));
-        model.addAttribute("pa", pam.getAllPostsAuthors());
-        model.addAttribute("authors", aum.getAllAuthors());
-        model.addAttribute("comments", cm.getAllComments());
-        model.addAttribute("attachments", atm.getAllAttachments());
+        model.addAttribute("post", pm.findById(id));
+        model.addAttribute("authors", aum.findAll());
+        model.addAttribute("comment", new Comment());
+        model.addAttribute("postIdForCommentErrors", -1);
+        model.addAttribute("userId", userId);
         return "postPage";
     }
 
     @GetMapping("/authorPage/{id}")
     public String authorPage(Model model, @PathVariable int id){
-        if(!aum.checkAuthor(id)){
+        if(userId == -1){
+            return "redirect:/";
+        }
+        if(!aum.checkById(id)){
             return "redirect:/error/This author does not exist!";
         }
-        model.addAttribute("author", aum.getAuthorById(id));
-        if(pam.getByAuthor(aum.getAuthorById(id)).isEmpty()){
+        List<Author> authors = new ArrayList<>();
+        authors.add(aum.findById(id));
+        if(pm.getPostsByAuthors(authors).isEmpty()){
             return "redirect:/error/This author have no posts!";
         }
-        model.addAttribute("posts", pm.getPostsByAuthors(pam.getByAuthor(aum.getAuthorById(id))));
-        model.addAttribute("comments", cm.getAllComments());
-        model.addAttribute("pa", pam.getAllPostsAuthors());
-        model.addAttribute("authors", aum.getAllAuthors());
-        model.addAttribute("i", pm.getPostsByAuthors(pam.getByAuthor(aum.getAuthorById(id))).size());
-        model.addAttribute("attachments", atm.getAllAttachments());
+        model.addAttribute("author", aum.findById(id));
+        model.addAttribute("posts", pm.getPostsByAuthors(authors));
+        model.addAttribute("authors", aum.findAll());
+        model.addAttribute("i", pm.getPostsByAuthors(authors).size());
+        model.addAttribute("comment", new Comment());
+        model.addAttribute("postIdForCommentErrors", -1);
+        model.addAttribute("userId", userId);
+        model.addAttribute("postsC", pm.getPostsByComments(aum.findById(id).getComments()));
+        model.addAttribute("j", pm.getPostsByComments(aum.findById(id).getComments()).size());
         return "authorPage";
     }
 
@@ -383,45 +383,32 @@ public class BlogController {
     }
 
     @PostMapping("/addAttachment/{id}")
-    public String addAttachment(@PathVariable int id, @RequestParam("file") MultipartFile file) throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException{
-        if(!pm.checkPost(id)){
+    public String addAttachment(@PathVariable int id, @RequestParam("file") MultipartFile file){
+        if(userId == -1){
+            return "redirect:/";
+        }
+        if(!pm.checkById(id)){
             return "redirect:/error/This post does not exist!";
         }
         if(!file.isEmpty()){
             sm.store(file);
-            Attachment attachment = new Attachment();
+            AttachmentDTO attachment = new AttachmentDTO();
             attachment.setFilename(file.getOriginalFilename());
-            attachment.setId_post(id);
-            atm.addAttachment(attachment);
+            attachment.setPost_id(id);
+            am.addAttachment(attachment, pm);
         }
-        atm.save();
         return "redirect:/editPost/" + id;
     }
 
-    @GetMapping("/deleteAttachment/{id}/{filename}")
-    public String deleteAttachment(@PathVariable int id, @PathVariable String filename) throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException{
-        if(!pm.checkPost(id)){
+    @GetMapping("/deleteAttachment/{id}/{aid}")
+    public String deleteAttachment(@PathVariable int id, @PathVariable int aid){
+        if(userId == -1){
+            return "redirect:/";
+        }
+        if(!pm.checkById(id)){
             return "redirect:/error/This post does not exist!";
         }
-        if(!filename.isEmpty()){
-            atm.deleteAttachment(id, filename);
-        }
-        atm.save();
+        am.deleteById(aid);
         return "redirect:/editPost/" + id;
     }
-
-    //////////////////////////////////////////////////////////////////////////////////////////////////////JSON////////////////////////////
-    @GetMapping(value = "/post/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Object> postJson(@PathVariable int id){
-        Post post = pm.getPostById(id);
-        return new ResponseEntity<Object>(post, HttpStatus.OK);
-    }
-
-    @GetMapping(value = "/posts/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Object> postsJson(@PathVariable int id){
-        List<Post> posts = pm.getPostsByAuthors(pam.getByAuthor(aum.getAuthorById(id)));
-        return new ResponseEntity<Object>(posts, HttpStatus.OK);
-    }
-
-     */
 }

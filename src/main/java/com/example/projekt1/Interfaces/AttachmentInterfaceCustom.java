@@ -19,6 +19,6 @@ public interface AttachmentInterfaceCustom {
 
     Attachment findById(int id);
 
-    //void deleteByFilename(int id, String filename);
+    Attachment findByFilename(String filename);
 
 }

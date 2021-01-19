@@ -32,7 +32,13 @@ public class CommentManager implements CommentInterfaceCustom {
             id = 1;
         }
         else{
-            id = ci.findAll().get(ci.findAll().size()-1).getId() + 1;
+            id = ci.findAll().get(0).getId();
+            for(Comment commentId: ci.findAll()){
+                if(commentId.getId() > id){
+                    id = commentId.getId();
+                }
+            }
+            id++;
         }
         commentToSave.setId(id);
         commentToSave.setComment_content(comment.getComment_content());
@@ -45,26 +51,14 @@ public class CommentManager implements CommentInterfaceCustom {
         pm.save(postToSave);
     }
 
+    public void editComment(Comment comment, int id){
+        Comment commentToSave = ci.findById(id);
+        commentToSave.setComment_content(comment.getComment_content());
+        ci.save(commentToSave);
+    }
+
     @Override
     public List<Comment> findAll(){ return ci.findAll(); }
-
-    @Override
-    public void deleteCommentsByPostId(int id){
-        /*List<Comment> commentsToDelete = new ArrayList<>();
-        List<Comment> comments = ci.findAll();
-        for(Comment comment: comments){
-            if(comment.getPost().getId() == id){
-                commentsToDelete.add(comment);
-            }
-        }
-        if(!commentsToDelete.isEmpty()){
-            for(Comment comment: commentsToDelete){
-                comments.remove(comment);
-            }
-        }
-
-         */
-    }
 
     @Override
     public Comment findById(int id){ return ci.findById(id); }
@@ -73,13 +67,25 @@ public class CommentManager implements CommentInterfaceCustom {
     public void deleteById(int id){ ci.deleteById(id); }
 
     @Override
-    public boolean checkComment(int id){
-        List<Comment> comments = ci.findAll();
-        for(Comment comment: comments){
-            if(comment.getId() == id){
-                return true;
+    public boolean checkById(int id){
+        Comment comment = ci.findById(id);
+        if(comment == null){
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean checkIfAuthor(int aid, int cid, AuthorManager aum){
+        Author author = aum.findById(aid);
+        if(!author.getComments().isEmpty()){
+            for(Comment comment: author.getComments()){
+                if(comment.getId() == cid){
+                    return true;
+                }
             }
         }
         return false;
     }
+
 }

@@ -12,16 +12,17 @@ import java.util.List;
 
 public interface CommentInterfaceCustom {
 
-    void addComment(CommentDTO comment, PostManager pm, AuthorManager am);
+    void addComment(CommentDTO comment, PostManager pm, AuthorManager aum);
 
     List<Comment> findAll();
-
-    void deleteCommentsByPostId(int id);
 
     Comment findById(int id);
 
     void deleteById(int id);
 
-    boolean checkComment(int id);
+    boolean checkById(int id);
 
+    boolean checkIfAuthor(int aid, int cid, AuthorManager aum);
+
+    void editComment(Comment comment, int id);
 }
