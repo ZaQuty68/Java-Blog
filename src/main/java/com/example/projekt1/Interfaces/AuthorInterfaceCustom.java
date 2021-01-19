@@ -9,7 +9,11 @@ import java.util.List;
 
 public interface AuthorInterfaceCustom {
 
-    boolean checkAuthor(int id);
+    boolean checkById(int id);
+
+    boolean checkByUsername(String username);
+
+    int logIn(String username, String password);
 
     List<Author> findAll();
 
@@ -18,4 +22,8 @@ public interface AuthorInterfaceCustom {
     List<Author> findAllByUsername(String username);
 
     void addAuthor(Author author);
+
+    Author findByUsername(String username);
+
+    void save(Author author);
 }

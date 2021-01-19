@@ -11,4 +11,8 @@ public interface TagInterfaceCustom {
     Tag findById(int id);
 
     void addTag(Tag tag);
+
+    List<Integer> getTagsId(String tags);
+
+    Tag findByTitle(String title);
 }

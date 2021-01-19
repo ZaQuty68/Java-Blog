@@ -27,28 +27,67 @@ public class AuthorManager implements AuthorInterfaceCustom {
 
     public AuthorIterface ai;
 
-    public AuthorManager(AuthorIterface ai){ this.ai = ai; }
+    public AuthorManager(AuthorIterface ai){
+        this.ai = ai;
+        if(ai.findById(0) == null){
+            Author admin = new Author();
+            admin.setId(0);
+            admin.setFirst_name("Sebastian");
+            admin.setLast_name("Czyzewski");
+            admin.setUsername("Admin");
+            admin.setPassword("Admin");
+            this.ai.save(admin);
+        }
+    }
 
     @Override
     public void addAuthor(Author author){
         Author authorToSave = new Author();
-        authorToSave.setId(author.getId());
+        int id;
+        if(ai.findAll().isEmpty()){
+            id = 1;
+        }
+        else{
+            id = ai.findAll().get(ai.findAll().size()-1).getId() + 1;
+        }
+        authorToSave.setId(id);
         authorToSave.setUsername(author.getUsername());
         authorToSave.setFirst_name(author.getFirst_name());
         authorToSave.setLast_name(author.getLast_name());
+        authorToSave.setPassword(author.getPassword());
         ai.save(authorToSave);
     }
 
     @Override
-    public boolean checkAuthor(int id){
-        List<Author> authors = ai.findAll();
-        for(Author author: authors){
-            if(author.getId() == id){
-                return true;
-            }
+    public boolean checkById(int id){
+        Author author = ai.findById(id);
+        if(author == null){
+            return false;
         }
-        return false;
+        return true;
     }
+    @Override
+    public boolean checkByUsername(String username){
+        Author author = ai.findByUsername(username);
+        if(author == null){
+            return false;
+        }
+        return true;
+    }
+    @Override
+    public int logIn(String username, String password){
+        Author author = ai.findByUsername(username);
+        if(author == null){
+            return -1;
+        }
+        if(author.getPassword().matches("^" + password + "$")){
+            return author.getId();
+        }
+        return -1;
+    }
+
+    @Override
+    public Author findByUsername(String username){ return ai.findByUsername(username); }
 
     @Override
     public List<Author> findAll(){
@@ -80,6 +119,9 @@ public class AuthorManager implements AuthorInterfaceCustom {
         }
         return authorsToReturn;
     }
+
+    @Override
+    public void save(Author author){ ai.save(author); }
 
 
 

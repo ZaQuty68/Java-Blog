@@ -1,75 +1,134 @@
 package com.example.projekt1.Controllers;
 
+import com.example.projekt1.Managers.*;
+import com.example.projekt1.Models.AttachmentDTO;
+import com.example.projekt1.Models.Author;
+import com.example.projekt1.Models.Comment;
+import com.example.projekt1.Models.Post;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.Errors;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.validation.Valid;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Controller
 public class BlogController {
-    private int pid=150, cid=200;
-
-    /*@Autowired
-    AttachmentManager atm;
+    @Autowired
+    AttachmentManager am;
     @Autowired
     AuthorManager aum;
     @Autowired
     CommentManager cm;
     @Autowired
-    Posts_AuthorsManager pam;
-    @Autowired
     PostManager pm;
+    @Autowired
+    TagManager tm;
     @Autowired
     StorageManager sm;
 
+    private int userId = -1;
 
-    //////////////////////////////////////////////////////////////////////////////////////////////////////MAIN PAGE/////////////////////////////////////////
+
+
+
+    /////////////////////////////////////////////////////////////////////////////////////////LOGIN
     @GetMapping("/")
+    public String login(){
+        userId = -1;
+        return "login";
+    }
+
+    @PostMapping("/")
+    public String processLogin(Model model, String username, String password){
+        userId = aum.logIn(username, password);
+        if(userId == -1){
+            model.addAttribute("loginError", true);
+            return "login";
+        }
+        return "redirect:/homePage";
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////REGISTER
+    @GetMapping("/register")
+    public String register(Model model){
+        model.addAttribute("author", new Author());
+        return "register";
+    }
+    @PostMapping("/register")
+    public String processRegister(@Valid Author author, Errors errors, Model model){
+        if(errors.hasErrors()){
+            return "register";
+        }
+        if(aum.checkByUsername(author.getUsername())){
+            model.addAttribute("registerError", true);
+            return "register";
+        }
+        aum.addAuthor(author);
+        return "redirect:/";
+    }
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////HOME PAGE/////////////////////////////////////////
+    @GetMapping("/homePage")
     public String homePage(Model model){
-        model.addAttribute("posts", pm.getAllPosts());
-        model.addAttribute("pa", pam.getAllPostsAuthors());
-        model.addAttribute("authors", aum.getAllAuthors());
-        model.addAttribute("comments", cm.getAllComments());
+        if(userId == -1){
+            return "redirect:/";
+        }
+        model.addAttribute("posts", pm.findAll());
+        model.addAttribute("authors", aum.findAll());
         model.addAttribute("comment", new Comment());
         model.addAttribute("postIdForCommentErrors", -1);
-        model.addAttribute("attachments", atm.getAllAttachments());
+        model.addAttribute("userId", userId);
         return "homePage";
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////ADDING///////////////////////////////////////////////////////
     @GetMapping("/addPost")
     public String addPost(Model model){
+        if(userId == -1){
+            return "redirect:/";
+        }
         model.addAttribute("post", new Post());
-        model.addAttribute("authors", aum.getAllAuthors());
+        model.addAttribute("authors", aum.findAll());
+        model.addAttribute("userId", userId);
         return "addPost";
     }
     @PostMapping("/addPost")
-    public String processAddingPost(@Valid Post post, Errors errors, int[] id, Model model, @RequestParam("file") MultipartFile file) throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException {
+    public String processAddingPost(@Valid Post post, Errors errors, int[] id, Model model, @RequestParam("file") MultipartFile file, String tags) throws IOException{
+        if(userId == -1){
+            return "redirect:/";
+        }
         if(errors.hasErrors()){
-            model.addAttribute("authors", aum.getAllAuthors());
+            model.addAttribute("authors", aum.findAll());
+            model.addAttribute("userId", userId);
             return "addPost";
         }
-        pid++;
         if(!file.isEmpty()){
             sm.store(file);
-            Attachment attachment = new Attachment();
+            AttachmentDTO attachment = new AttachmentDTO();
             attachment.setFilename(file.getOriginalFilename());
-            attachment.setId_post(pid);
-            atm.addAttachment(attachment);
+            attachment.setPost_id(post.getId());
+            am.addAttachment(attachment, pm);
         }
-        post.setId(pid);
-        pm.addPost(post);
-        if(id.length != 0){
-            for(int i: id){
-                Posts_Authors par = new Posts_Authors();
-                par.setId_author(i);
-                par.setId_post(pid);
-                pam.addP_A(par);
-            }
+        List<Integer> authorId = new ArrayList<>();
+        authorId.add(userId);
+        for(int i: id){
+            authorId.add(i);
         }
-        atm.save();
-        pam.save();
-        pm.save();
-        return "redirect:/";
+        List<Integer> tagId = tm.getTagsId(tags);
+        pm.addPost(post, authorId, aum, tagId, tm);
+        return "redirect:/homePage";
     }
+
+    /*
 
     @PostMapping("/addComment/{id}")
     public String addComment(@Valid Comment comment, Errors errors, Model model, @PathVariable int id) throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException{

@@ -67,7 +67,7 @@ public class BlogControllerApi {
 
     @PostMapping("/api/comments")
     public Comment addComment(@RequestBody CommentDTO comment){
-        cm.addComment(comment, pm);
+        cm.addComment(comment, pm, aum);
         return cm.findById(comment.getId());
     }
 

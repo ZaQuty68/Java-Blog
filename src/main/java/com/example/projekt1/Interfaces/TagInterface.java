@@ -11,4 +11,6 @@ public interface TagInterface extends JpaRepository<Tag, Integer> {
 
     Tag findById(int id);
 
+    Tag findByTitle(String title);
+
 }

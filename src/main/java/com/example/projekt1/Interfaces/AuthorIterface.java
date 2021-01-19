@@ -11,6 +11,8 @@ public interface AuthorIterface extends JpaRepository<Author, Integer> {
 
     Author findById(int id);
 
+    Author findByUsername(String username);
+
 }
 
 

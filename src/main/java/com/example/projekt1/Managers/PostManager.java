@@ -27,13 +27,20 @@ public class PostManager implements PostInterfaceCustom {
     @Override
     public void addPost(Post post, List<Integer> auhtorId, AuthorManager am, List<Integer> tagId, TagManager ti){
         Post postToSave = new Post();
-        postToSave.setId(post.getId());
-        postToSave.setPost_content(post.getPost_content());
-        for(int id: auhtorId){
-            postToSave.getAuthors().add(am.findById(id));
+        int id;
+        if(pi.findAll().isEmpty()){
+            id = 1;
         }
-        for(int id: tagId){
-            postToSave.getTags().add(ti.findById(id));
+        else{
+            id = pi.findAll().get(pi.findAll().size()-1).getId() + 1;
+        }
+        postToSave.setId(id);
+        postToSave.setPost_content(post.getPost_content());
+        for(int id2: auhtorId){
+            postToSave.getAuthors().add(am.findById(id2));
+        }
+        for(int id2: tagId){
+            postToSave.getTags().add(ti.findById(id2));
         }
         pi.save(postToSave);
     }

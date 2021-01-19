@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Register</title>
+    <link rel="stylesheet" th:href="@{/styles.css}"/>
+</head>
+<body>
+    <h1>Create new account:</h1>
+    <div class = "block">
+        <form method="POST" enctype="multipart/form-data" th:action="@{/register}" th:object="${author}">
+            <div th:if="${#fields.hasErrors()}">
+                <span class="error">
+                    Please correct following errors:
+                </span>
+            </div>
+
+            <label for="first_name">First name: </label>
+            <input type="text" id="first_name" th:field="*{first_name}" autofocus="autofocus"/>
+            <span class="error" th:if="${#fields.hasErrors('first_name')}" th:errors="*{first_name}">First name error</span><br/><br/>
+
+            <label for="last_name">Last name: </label>
+            <input type="text" id="last_name" th:field="*{last_name}"/>
+            <span class="error" th:if="${#fields.hasErrors('last_name')}" th:errors="*{last_name}">Last name error</span><br/><br/>
+
+            <label for="username">Username: </label>
+            <input type="text" id="username" th:field="*{username}"/>
+            <span class="error" th:if="${#fields.hasErrors('username')}" th:errors="*{username}">Username error</span>
+            <span th:if="${registerError}" class="error">This username is already taken!</span><br/><br/>
+
+            <label for="password">Password: </label>
+            <input type="password" id="password" th:field="*{password}"/>
+            <span class="error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">Password error</span><br/><br/>
+
+            <input type="submit" value="Register"/>
+        </form>
+        <br/>
+        <a th:href="@{'/'}" class="button">Cancel</a>
+    </div>
+</body>
+</html>

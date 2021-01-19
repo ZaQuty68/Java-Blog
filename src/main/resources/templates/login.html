@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Logging in</title>
+    <link rel="stylesheet" th:href="@{/styles.css}"/>
+</head>
+<body>
+    <h1>Welcome!</h1>
+    <h2>Please log in:</h2>
+    <p th:if="${loginError}" class="error">Wrong username or password!</p>
+    <div class="block">
+        <form method="POST" th:action="@{/}">
+            <label for="username">Username: </label>
+            <input type="text" name="username" id="username" autofocus="autofocus" pattern="^[a-zA-Z0-9]+$" title="Must contain only numbers and letters!"/> <br/><br/>
+            <label for="password">Password: </label>
+            <input type="password" id="password" name="password" pattern="^[a-zA-Z0-9]+$" title="Must contain only numbers and letters!"/> <br/><br/>
+            <input type="submit" value="Log in"/> <br/><br/>
+        </form>
+        <a th:href="@{/register}" class = "button">Register</a>
+    </div>
+</body>
+</html>

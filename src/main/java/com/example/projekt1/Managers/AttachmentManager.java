@@ -31,7 +31,14 @@ public class AttachmentManager implements AttachmentInterfaceCustom {
     @Override
     public void addAttachment(AttachmentDTO attachment, PostManager pm){
         Attachment attachmentToSave = new Attachment();
-        attachmentToSave.setId(attachment.getId());
+        int id;
+        if(ai.findAll().isEmpty()){
+            id = 1;
+        }
+        else{
+            id = ai.findAll().get(ai.findAll().size()-1).getId() + 1;
+        }
+        attachmentToSave.setId(id);
         attachmentToSave.setFilename(attachment.getFilename());
         ai.save(attachmentToSave);
         Post postToSave = pm.findById(attachment.getPost_id());

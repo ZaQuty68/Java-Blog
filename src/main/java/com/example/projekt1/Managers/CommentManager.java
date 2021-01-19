@@ -2,6 +2,7 @@ package com.example.projekt1.Managers;
 
 import com.example.projekt1.Interfaces.CommentInterface;
 import com.example.projekt1.Interfaces.CommentInterfaceCustom;
+import com.example.projekt1.Models.Author;
 import com.example.projekt1.Models.Comment;
 import com.example.projekt1.Models.CommentDTO;
 import com.example.projekt1.Models.Post;
@@ -24,12 +25,21 @@ public class CommentManager implements CommentInterfaceCustom {
     }
 
     @Override
-    public void addComment(CommentDTO comment, PostManager pm){
+    public void addComment(CommentDTO comment, PostManager pm, AuthorManager am){
         Comment commentToSave = new Comment();
-        commentToSave.setId(comment.getId());
-        commentToSave.setUsername(comment.getUsername());
+        int id;
+        if(ci.findAll().isEmpty()){
+            id = 1;
+        }
+        else{
+            id = ci.findAll().get(ci.findAll().size()-1).getId() + 1;
+        }
+        commentToSave.setId(id);
         commentToSave.setComment_content(comment.getComment_content());
         ci.save(commentToSave);
+        Author authorToSave = am.findById(comment.getAuthor_id());
+        authorToSave.getComments().add(commentToSave);
+        am.save(authorToSave);
         Post postToSave = pm.findById(comment.getPost_id());
         postToSave.getComments().add(commentToSave);
         pm.save(postToSave);
@@ -71,38 +81,5 @@ public class CommentManager implements CommentInterfaceCustom {
             }
         }
         return false;
-    }
-
-    @Override
-    public List<Comment> getCommentsByUsername(String username){
-        List<Comment> comments = ci.findAll();
-        List<Comment> commentsToReturn = new ArrayList<>();
-        Pattern pattern = Pattern.compile(username, Pattern.CASE_INSENSITIVE);
-        Matcher matcher;
-        boolean matchFound;
-        for(Comment comment: comments){
-            matcher = pattern.matcher(comment.getUsername());
-            matchFound = matcher.find();
-            if(matchFound){
-                commentsToReturn.add(comment);
-            }
-        }
-        return commentsToReturn;
-    }
-
-    @Override
-    public boolean checkCommentsByUsername(String username){
-        List<Comment> comments = ci.findAll();
-        Pattern pattern = Pattern.compile("^" + username + "$");
-        Matcher matcher;
-        boolean matchFound, flag=false;
-        for(Comment comment: comments){
-            matcher = pattern.matcher(comment.getUsername());
-            matchFound = matcher.find();
-            if(matchFound){
-                flag=true;
-            }
-        }
-        return flag;
     }
 }

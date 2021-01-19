@@ -14,37 +14,31 @@
                     Please correct following errors:
                 </span>
             </div>
-            <label for="id">Authors:</label>
-            <select th:value="${id}" name="id" id="id" multiple="multiple" required="required" class="select">
-                <option th:each="author: ${authors}" th:value="${author.id}" th:text="${author.username}">Username</option>
+
+            <label for="id">Additional authors:</label>
+            <select th:value="${id}" name="id" id="id" multiple="multiple" class="select">
+                <option th:each="author: ${authors}" th:unless="${author.id == userId}" th:value="${author.id}" th:text="${author.username}">Username</option>
             </select>
             <br/><br/>
 
             <label for="post_content">Post content:</label>
-            <input type="text" th:field="*{post_content}"/>
+            <input type="text" th:field="*{post_content}" id="post_content" autofocus="autofocus"/>
 
-            <span class="error"
-                  th:if="${#fields.hasErrors('post_content')}"
-                  th:errors="*{post_content}">Post content Error
-            </span>
+            <span class="error" th:if="${#fields.hasErrors('post_content')}" th:errors="*{post_content}">Post content Error</span>
             <br/><br/>
 
             <label for="file">Attachment to upload:</label>
-            <input type="file" name="file" class="button-invisible"/>
+            <input type="file" name="file" id="file"/>
             <br/><br/>
 
             <label for="tags">Tags:</label>
-            <input type="text" th:field="*{tags}"/>
-
-            <span class="error"
-                  th:if="${#fields.hasErrors('tags')}"
-                  th:errors="*{tags}">Tags Error
-            </span>
+            <input type="text" name="tags" id="tags" pattern="^(\s*\S+\s+){0,3}\S+\s*$" title="There is from 1 to 4 tags allowed"/>
             <br/><br/>
+
             <input type="submit" value="Submit"/>
         </form>
         <br/>
-        <a th:href="@{'/'}" class="button">Cancel</a>
+        <a th:href="@{/homePage}" class="button">Cancel</a>
     </div>
 </body>
 </html>
